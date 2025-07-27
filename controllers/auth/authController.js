@@ -2,7 +2,7 @@
 import userModel from "../models/userModel.js";
 import { authService } from "../services/authService.js";
 import { tokenService } from "../services/tokenService.js";
-import { validateRegistration, validateLogin, validateOTPRequest } from "../utils/validationUtils.js";
+import { validateRegistration, validateLogin, validateOTPRequest } from "../../utils/validationUtils.js";
 
 export const register = async (req, res) => {
     try {
