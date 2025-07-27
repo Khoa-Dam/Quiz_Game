@@ -12,6 +12,8 @@ authRouter.post("/verify-account", userAuth, verifyEmail);
 authRouter.post("/is-auth", userAuth, isAuthenticated);
 authRouter.post("/send-reset-otp", sendResetOtp);
 authRouter.post("/reset-password", resetPassword);
+authRouter.post("/github", githubAuth);
+authRouter.post("/github/callback", githubCallback);
 
 
 

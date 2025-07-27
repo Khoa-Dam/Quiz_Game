@@ -237,3 +237,52 @@ export const resetPassword = async(req, res) =>{
         return res.json({success: false, message: error.message});
     }
 }
+
+
+//Github Auth
+export const githubAuth = async (req, res) => {
+    const redirectUri = process.env.GITHUB_REDIRECT_URI;
+    const clientId = process.env.GITHUB_CLIENT_ID;
+
+    const url = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=user:email`;
+    
+    res.redirect(url);
+}
+
+export const githubCallback = async (req, res) => {
+    const code = req.query.code;
+
+        const tokenRes = await axios.post('https://github.com/login/oauth/access_token', {
+            client_id: process.env.GITHUB_CLIENT_ID,
+            client_secret: process.env.GITHUB_CLIENT_SECRET,
+            code: code
+        },
+             {
+            headers: {
+                'Accept': 'application/json'
+                }
+            }
+    );
+
+    const accessToken = tokenRes.data.access_token;
+    const userRes = await axios.get('https://api.github.com/user', {
+        headers: {
+            'Authorization': `Bearer ${accessToken}`
+        }
+    });
+
+    const emailRes = await axios.get('https://api.github.com/user/emails', {
+        headers: {
+            'Authorization': `Bearer ${accessToken}`
+        }
+    });
+
+    const email = emailRes.data.find(e => e.primary  && e.verified)?.email;
+
+    console.log("github user data", {
+        user: userRes.data.name,
+        email
+    })
+    
+    res.redirect(`http://localhost:3000/success`);
+}
