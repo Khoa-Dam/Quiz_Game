@@ -18,5 +18,5 @@ const roomModel = new mongoose.Schema({
     timestamps: true,
     expires: "24h"  
 })
-
+                                                                    
 export default mongoose.model("Room", roomModel);

@@ -1,4 +1,6 @@
 import express from "express";
+import { createServer } from "http";
+import { Server } from "socket.io";
 import cors from "cors";
 import "dotenv/config";
 import cookieParser from "cookie-parser";
@@ -6,8 +8,18 @@ import connectDB from "./config/mongodb.js";
 import authRouter from "./routes/auth/authRouters.js";
 import userRouter from "./routes/user/userRouters.js";
 import quizRouter from "./routes/quiz/quizRouters.js";
+import roomRouter from "./routes/room/roomRoutes.js";
+import { GameSocketService } from "./services/socket/gameSocketService.js";
 
 const app = express();
+const server = createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "*", // Configure for production
+    methods: ["GET", "POST"]
+  }
+});
+
 const port = process.env.PORT || 3000;
 connectDB();
 
@@ -15,13 +27,21 @@ app.use(cors({credentials: true}));
 app.use(cookieParser());
 app.use(express.json());
 
+// Routes
 app.get("/", (req, res) => {
-    res.send("API working");
+    res.send("🎮 Quiz Game API working");
 });
+
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
 app.use("/api/quiz", quizRouter);
+app.use("/api/room", roomRouter);
 
-app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
+// Initialize Socket.IO
+const gameSocketService = new GameSocketService(io);
+gameSocketService.initializeEvents();
+
+server.listen(port, () => {
+    console.log(`🚀 Server is running on port ${port}`);
+    console.log(`🎮 Socket.IO ready for realtime quiz game`);
 });
