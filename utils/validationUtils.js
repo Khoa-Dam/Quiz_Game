@@ -50,3 +50,21 @@ export const validatePasswordOnly = (password) => {
     const passwordValidation = validatePassword(password);
     return passwordValidation.errors;
 };
+
+export const validateQuizCreation = ({ title, questionIds }) => {
+    const errors = [];
+    
+    if (!title || title.trim().length < 3) {
+      errors.push('Quiz title must be at least 3 characters');
+    }
+    
+    if (!questionIds || !Array.isArray(questionIds) || questionIds.length === 0) {
+      errors.push('Quiz must have at least 1 question');
+    }
+    
+    if (questionIds && questionIds.length > 15) {
+      errors.push('Quiz cannot have more than 15 questions');
+    }
+    
+    return errors;
+  };
