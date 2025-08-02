@@ -4,19 +4,25 @@ import Question from "../../models/quiz/questionModel.js";
 export const quizService = {
   
   /**
-   * Tạo quiz mới
+   * Tạo quiz mới với questions tự động
    */
-  async createQuiz({ title, description, questionIds, timePerQuestion, createdBy, scoring }) {
-    // Kiểm tra questions tồn tại
-    const questions = await Question.find({ _id: { $in: questionIds } });
-    if (questions.length !== questionIds.length) {
-      throw new Error('Một số câu hỏi không tồn tại');
+  async createQuiz({ title, description, questions, timePerQuestion, createdBy, scoring }) {
+    // Tạo questions mới
+    const createdQuestions = [];
+    for (const questionData of questions) {
+      const question = new Question({
+        text: questionData.text,
+        options: questionData.options,
+        correctAnswer: questionData.correctAnswer
+      });
+      await question.save();
+      createdQuestions.push(question._id);
     }
     
     const quiz = new Quiz({
       title,
       description,
-      questions: questionIds,
+      questions: createdQuestions,
       timePerQuestion: timePerQuestion || 15,
       createdBy,
       scoring: {
@@ -56,9 +62,17 @@ export const quizService = {
    * Lấy quiz cho game (không có đáp án)
    */
   async getQuizForGame(quizId) {
+    console.log('=== GET QUIZ FOR GAME DEBUG ===');
+    console.log('Quiz ID:', quizId);
+    
     const quiz = await Quiz.findOne({ _id: quizId, isActive: true })
       .populate('questions', 'text options')
       .populate('createdBy', 'name');
+    
+    console.log('Quiz found:', !!quiz);
+    console.log('Quiz createdBy:', quiz?.createdBy);
+    console.log('Quiz questions count:', quiz?.questions?.length);
+    console.log('===============================');
     
     if (!quiz) {
       throw new Error('Quiz không tồn tại hoặc đã bị vô hiệu hóa');
@@ -71,7 +85,7 @@ export const quizService = {
       description: quiz.description,
       totalQuestions: quiz.questions.length,
       timePerQuestion: quiz.timePerQuestion,
-      createdBy: quiz.createdBy.name,
+      createdBy: quiz.createdBy?.name || "Unknown",
       scoring: quiz.scoring,
       questions: quiz.questions.map((q, index) => ({
         index: index,

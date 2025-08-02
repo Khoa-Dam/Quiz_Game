@@ -1,5 +1,5 @@
 // services/emailService.js
-import transporter from "../config/nodemailer.js";
+import transporter from "../../config/nodemailer.js";
 
 export const emailService = {
     async sendWelcomeEmail(email, name) {

@@ -51,19 +51,35 @@ export const validatePasswordOnly = (password) => {
     return passwordValidation.errors;
 };
 
-export const validateQuizCreation = ({ title, questionIds }) => {
+export const validateQuizCreation = ({ title, questions }) => {
     const errors = [];
     
     if (!title || title.trim().length < 3) {
       errors.push('Quiz title must be at least 3 characters');
     }
     
-    if (!questionIds || !Array.isArray(questionIds) || questionIds.length === 0) {
+    if (!questions || !Array.isArray(questions) || questions.length === 0) {
       errors.push('Quiz must have at least 1 question');
     }
     
-    if (questionIds && questionIds.length > 15) {
+    if (questions && questions.length > 15) {
       errors.push('Quiz cannot have more than 15 questions');
+    }
+    
+    // Validate each question
+    if (questions && Array.isArray(questions)) {
+      for (let i = 0; i < questions.length; i++) {
+        const question = questions[i];
+        if (!question.text || question.text.trim().length < 5) {
+          errors.push(`Question ${i + 1}: Text must be at least 5 characters`);
+        }
+        if (!question.options || !Array.isArray(question.options) || question.options.length !== 4) {
+          errors.push(`Question ${i + 1}: Must have exactly 4 options`);
+        }
+        if (question.correctAnswer === undefined || question.correctAnswer < 0 || question.correctAnswer > 3) {
+          errors.push(`Question ${i + 1}: Correct answer must be between 0 and 3`);
+        }
+      }
     }
     
     return errors;

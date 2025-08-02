@@ -3,11 +3,11 @@ import { validateQuizCreation } from "../../utils/validationUtils.js";
 
 export const createQuiz = async (req, res) => {
   try {
-    const { title, description, questionIds, timePerQuestion, scoring } = req.body;
+    const { title, description, questions, timePerQuestion, scoring } = req.body;
     const userId = req.user?.id;
     
     // Validation
-    const validationErrors = validateQuizCreation({ title, questionIds });
+    const validationErrors = validateQuizCreation({ title, questions });
     if (validationErrors.length > 0) {
       return res.json({
         success: false,
@@ -17,7 +17,7 @@ export const createQuiz = async (req, res) => {
     
     // Service call
     const result = await quizService.createQuiz({
-      title, description, questionIds, timePerQuestion, createdBy: userId, scoring
+      title, description, questions, timePerQuestion, createdBy: userId, scoring
     });
     
     return res.json({

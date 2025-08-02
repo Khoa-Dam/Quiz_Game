@@ -5,12 +5,9 @@ import cors from "cors";
 import "dotenv/config";
 import cookieParser from "cookie-parser";
 import connectDB from "./config/mongodb.js";
-import authRouter from "./routes/auth/authRouters.js";
-import userRouter from "./routes/user/userRouters.js";
-import quizRouter from "./routes/quiz/quizRouters.js";
-import roomRouter from "./routes/room/roomRoutes.js";
+import v1Routes from "./routes/v1/index.js";
 import { GameSocketService } from "./services/socket/gameSocketService.js";
-
+import { errorHandler } from "./middleware/errorHandler.js";
 const app = express();
 const server = createServer(app);
 const io = new Server(server, {
@@ -32,10 +29,9 @@ app.get("/", (req, res) => {
     res.send("🎮 Quiz Game API working");
 });
 
-app.use("/api/auth", authRouter);
-app.use("/api/user", userRouter);
-app.use("/api/quiz", quizRouter);
-app.use("/api/room", roomRouter);
+app.use("/api/v1", v1Routes);
+
+app.use(errorHandler);
 
 // Initialize Socket.IO
 const gameSocketService = new GameSocketService(io);

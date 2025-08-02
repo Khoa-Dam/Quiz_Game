@@ -1,8 +1,8 @@
 import bcrypt from "bcryptjs";
-import userModel from "../models/userModel.js";
+import userModel from "../../models/users/userModel.js";
 import { emailService } from "./emailService.js";
 import { tokenService } from "./tokenService.js";
-import { generateOTP, validatePassword } from "../utils/authUtils.js";
+import { generateOTP, validatePassword } from "../../utils/authUtils.js";
 
 export const authService = {
     //Register
@@ -33,7 +33,7 @@ export const authService = {
 
     const token  = tokenService.createToken(newUser._id);
 
-    await emailService.sendWelcomeEmail(email, token);
+    await emailService.sendWelcomeEmail(email, name);
 
     return token
 

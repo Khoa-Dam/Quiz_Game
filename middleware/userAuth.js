@@ -1,5 +1,5 @@
 // middleware/userAuth.js
-import { tokenService } from "../services/tokenService.js";
+import { tokenService } from "../services/auth/tokenService.js";
 
 const userAuth = async (req, res, next) => {
     const token = req.cookies.token;
