@@ -8,6 +8,7 @@ import connectDB from "./config/mongodb.js";
 import v1Routes from "./routes/v1/index.js";
 import { GameSocketService } from "./services/socket/gameSocketService.js";
 import { errorHandler } from "./middleware/errorHandler.js";
+import { specs, swaggerUi } from "./config/swagger.js";
 const app = express();
 const server = createServer(app);
 const io = new Server(server, {
@@ -30,6 +31,9 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/v1", v1Routes);
+
+// Swagger Documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 app.use(errorHandler);
 
