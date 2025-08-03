@@ -2,7 +2,7 @@
  * @swagger
  * components:
  *   schemas:
- *     UserData:
+ *     User:
  *       type: object
  *       properties:
  *         _id:

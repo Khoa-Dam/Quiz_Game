@@ -2,45 +2,6 @@
  * @swagger
  * components:
  *   schemas:
- *     RoomSettings:
- *       type: object
- *       properties:
- *         maxPlayers:
- *           type: integer
- *           default: 10
- *           minimum: 2
- *           maximum: 20
- *           description: Maximum number of players
- *         timePerQuestion:
- *           type: integer
- *           default: 30
- *           description: Time per question in seconds
- *         autoStart:
- *           type: boolean
- *           default: false
- *           description: Auto start when enough players
- *         showLeaderboard:
- *           type: boolean
- *           default: true
- *           description: Show leaderboard during game
- *     CreateRoom:
- *       type: object
- *       required:
- *         - quizId
- *       properties:
- *         quizId:
- *           type: string
- *           description: ID of the quiz to play
- *         settings:
- *           $ref: '#/components/schemas/RoomSettings'
- *     JoinRoom:
- *       type: object
- *       required:
- *         - roomCode
- *       properties:
- *         roomCode:
- *           type: string
- *           description: 6-character room code
  *     Room:
  *       type: object
  *       properties:

@@ -1,34 +1,3 @@
-/**
- * @swagger
- * components:
- *   schemas:
- *     User:
- *       type: object
- *       required:
- *         - name
- *         - email
- *         - password
- *       properties:
- *         name:
- *           type: string
- *           description: User's name
- *         email:
- *           type: string
- *           description: User's email
- *         password:
- *           type: string
- *           description: User's password
- *     Login:
- *       type: object
- *       required:
- *         - email
- *         - password
- *       properties:
- *         email:
- *           type: string
- *         password:
- *           type: string
- */
 
 /**
  * @swagger

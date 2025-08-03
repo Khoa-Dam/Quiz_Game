@@ -54,23 +54,6 @@
  *             maxTimeBonus:
  *               type: integer
  *               default: 50
- *     CheckAnswer:
- *       type: object
- *       required:
- *         - questionIndex
- *         - selectedAnswer
- *       properties:
- *         questionIndex:
- *           type: integer
- *           description: Index of question (0-based)
- *         selectedAnswer:
- *           type: integer
- *           minimum: 0
- *           maximum: 3
- *           description: Selected answer index
- *         responseTime:
- *           type: integer
- *           description: Response time in milliseconds
  */
 
 /**
