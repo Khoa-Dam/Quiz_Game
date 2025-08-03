@@ -115,7 +115,6 @@ export const authService = {
         }
 
         const otp = generateOTP();
-        console.log("check otp", otp);
         const otpExpireAt = Date.now() + 10 * 60 * 1000; // 10 phút
 
         user.resetOtp = otp;

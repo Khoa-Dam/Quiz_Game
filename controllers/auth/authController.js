@@ -5,11 +5,9 @@ import { tokenService } from "../../services/auth/tokenService.js";
 import { validateRegistration, validateLogin, validateOTPRequest } from "../../utils/validationUtils.js";
 
 export const register = async (req, res) => {
-    console.log("check req.body", req.body);
     try {
         const { name, email, password } = req.body;
 
-        console.log("check name,email,password", name, email, password);
         // Validation
         const validationErrors = validateRegistration({ name, email, password });
         if (validationErrors.length > 0) {
