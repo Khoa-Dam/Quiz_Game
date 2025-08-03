@@ -331,16 +331,6 @@ socket.on('player_joined', (data) => {
   console.log('Player joined:', data);
 });
 ```
-
-### Unit Testing
-```bash
-# Run tests
-npm test
-
-# Run tests with coverage
-npm run test:coverage
-```
-
 ## 🚀 Deployment
 
 ### Production Environment
@@ -351,109 +341,6 @@ NODE_ENV=production
 PORT=3000
 MONGODB_URI=mongodb://your-production-db
 JWT_SECRET=your-production-secret
-```
-
-2. **Build and Start**:
-```bash
-npm run build
-npm start
-```
-
-### Docker Deployment
-
-```dockerfile
-FROM node:16-alpine
-
-WORKDIR /app
-
-COPY package*.json ./
-RUN npm ci --only=production
-
-COPY . .
-
-EXPOSE 3000
-
-CMD ["npm", "start"]
-```
-
-```bash
-# Build image
-docker build -t quiz-game .
-
-# Run container
-docker run -p 3000:3000 quiz-game
-```
-
-### PM2 Deployment
-
-```bash
-# Install PM2
-npm install -g pm2
-
-# Start application
-pm2 start server.js --name "quiz-game"
-
-# Monitor
-pm2 monit
-
-# Logs
-pm2 logs quiz-game
-```
-
-## 🔧 Development
-
-### Available Scripts
-
-```bash
-npm start          # Run production
-npm run dev        # Run development with nodemon
-npm test           # Run tests
-npm run lint       # Lint code
-npm run format     # Format code
-```
-
-### Code Style
-
-The project uses ESLint and Prettier for code formatting:
-
-```bash
-# Lint code
-npm run lint
-
-# Fix linting issues
-npm run lint:fix
-
-# Format code
-npm run format
-```
-
-## 🤝 Contributing
-
-### How to Contribute
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Create a Pull Request
-
-### Coding Standards
-
-- Use ES6+ syntax
-- Follow ESLint rules
-- Write tests for new features
-- Update documentation when needed
-
-### Commit Message Convention
-
-```
-feat: add new feature
-fix: bug fix
-docs: update documentation
-style: code formatting
-refactor: code refactoring
-test: add tests
-chore: maintenance tasks
 ```
 
 ## 🙏 Acknowledgments
