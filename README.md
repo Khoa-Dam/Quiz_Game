@@ -10,7 +10,6 @@ A multiplayer Quiz Game application built with Node.js, Express.js, MongoDB, and
 - [Project Structure](#-project-structure)
 - [API Documentation](#-api-documentation)
 - [Usage](#-usage)
-- [Testing](#-testing)
 - [Deployment](#-deployment)
 
 ## ✨ Features
