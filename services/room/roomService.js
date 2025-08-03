@@ -37,11 +37,11 @@ export class RoomService {
         success: true,
         room,
         roomCode,
-        message: 'Tạo phòng thành công'
+        message: 'Create room successfully'
       };
 
     } catch (error) {
-      throw new Error(`Lỗi tạo phòng: ${error.message}`);
+      throw new Error(`Error creating room: ${error.message}`);
     }
   }
 
@@ -55,20 +55,20 @@ export class RoomService {
         .populate('players', 'username email');
 
       if (!room) {
-        throw new Error('Phòng không tồn tại');
+        throw new Error('Room not found');
       }
 
       if (room.status !== 'waiting') {
-        throw new Error('Phòng đã bắt đầu game');
+        throw new Error('Room has already started');
       }
 
       if (room.players.length >= room.settings.maxPlayers) {
-        throw new Error('Phòng đã đầy');
+        throw new Error('Room is full');
       }
 
       // Check if user is already in room
       if (room.players.includes(userId)) {
-        throw new Error('Bạn đã trong phòng này');
+        throw new Error('You are already in this room');
       }
 
       // Add player to room
@@ -78,11 +78,11 @@ export class RoomService {
       return {
         success: true,
         room,
-        message: 'Tham gia phòng thành công'
+        message: 'Join room successfully'
       };
 
     } catch (error) {
-      throw new Error(`Lỗi tham gia phòng: ${error.message}`);
+      throw new Error(`Error joining room: ${error.message}`);
     }
   }
 
@@ -96,19 +96,19 @@ export class RoomService {
         .populate('players');
 
       if (!room) {
-        throw new Error('Phòng không tồn tại');
+        throw new Error('Room not found');
       }
 
       if (room.host.toString() !== hostId) {
-        throw new Error('Chỉ host mới có thể bắt đầu game');
+        throw new Error('Only host can start the game');
       }
 
       if (room.status !== 'waiting') {
-        throw new Error('Game đã bắt đầu');
+        throw new Error('Game has already started');
       }
 
       if (room.players.length < 2) {
-        throw new Error('Cần ít nhất 2 người chơi');
+        throw new Error('At least 2 players are required');
       }
 
       // Update room status
@@ -119,11 +119,11 @@ export class RoomService {
       return {
         success: true,
         room,
-        message: 'Game đã bắt đầu'
+        message: 'Game has started'
       };
 
     } catch (error) {
-      throw new Error(`Lỗi bắt đầu game: ${error.message}`);
+      throw new Error(`Error starting game: ${error.message}`);
     }
   }
 
@@ -135,7 +135,7 @@ export class RoomService {
       const room = await Room.findById(roomId);
       
       if (!room) {
-        return { success: true, message: 'Phòng không tồn tại' };
+        return { success: true, message: 'Room not found' };
       }
 
       // Remove player from room
@@ -146,7 +146,7 @@ export class RoomService {
       // If no players left, delete room
       if (room.players.length === 0) {
         await Room.findByIdAndDelete(roomId);
-        return { success: true, message: 'Phòng đã đóng' };
+        return { success: true, message: 'Room closed' };
       }
 
       // If host left, assign new host
@@ -158,11 +158,11 @@ export class RoomService {
 
       return {
         success: true,
-        message: 'Đã rời phòng'
+        message: 'Left room'
       };
 
     } catch (error) {
-      throw new Error(`Lỗi rời phòng: ${error.message}`);
+      throw new Error(`Error leaving room: ${error.message}`);
     }
   }
 
@@ -177,7 +177,7 @@ export class RoomService {
         .populate('host', 'username email');
 
       if (!room) {
-        throw new Error('Phòng không tồn tại');
+        throw new Error('Room not found');
       }
 
       return {
@@ -186,7 +186,7 @@ export class RoomService {
       };
 
     } catch (error) {
-      throw new Error(`Lỗi lấy thông tin phòng: ${error.message}`);
+      throw new Error(`Error getting room info: ${error.message}`);
     }
   }
 
@@ -201,7 +201,7 @@ export class RoomService {
         .populate('host', 'username email');
 
       if (!room) {
-        throw new Error('Phòng không tồn tại');
+        throw new Error('Room not found');
       }
 
       return {
@@ -210,7 +210,7 @@ export class RoomService {
       };
 
     } catch (error) {
-      throw new Error(`Lỗi lấy thông tin phòng: ${error.message}`);
+      throw new Error(`Error getting room info: ${error.message}`);
     }
   }
 

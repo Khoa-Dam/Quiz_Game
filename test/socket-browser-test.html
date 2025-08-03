@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔌 Socket.IO Browser Test</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+<body>
+    <h1>🔌 Socket.IO Browser Test</h1>
+    <p>Mở Developer Tools (F12) → Console để test</p>
+    
+    <script>
+        // Connect to Socket.IO server
+        const socket = io('http://localhost:3000');
+        
+        // Connection events
+        socket.on('connect', () => {
+            console.log('✅ Connected to server');
+            console.log('Socket ID:', socket.id);
+        });
+        
+        socket.on('disconnect', () => {
+            console.log('❌ Disconnected from server');
+        });
+        
+        // Authentication events
+        socket.on('authenticated', (data) => {
+            console.log('✅ Authenticated:', data);
+        });
+        
+        socket.on('auth_error', (data) => {
+            console.log('❌ Auth error:', data);
+        });
+        
+        // Room events
+        socket.on('room_joined', (data) => {
+            console.log('✅ Room joined:', data);
+        });
+        
+        socket.on('room_created', (data) => {
+            console.log('🏠 Room created:', data);
+        });
+        
+        socket.on('player_joined', (data) => {
+            console.log('👥 Player joined:', data.player.name);
+        });
+        
+        // Game events
+        socket.on('game_started', (data) => {
+            console.log('🎮 Game started:', data);
+        });
+        
+        socket.on('new_question', (data) => {
+            console.log('❓ New question:', data);
+        });
+        
+        socket.on('answer_submitted', (data) => {
+            console.log('📝 Answer submitted:', data);
+        });
+        
+        socket.on('error', (data) => {
+            console.log('❌ Error:', data);
+        });
+        
+        // Test functions (run in console)
+        window.testSocket = {
+            // Authenticate
+            authenticate: (token) => {
+                socket.emit('authenticate', { token });
+                console.log('🔐 Authenticating with token:', token.substring(0, 20) + '...');
+            },
+            
+            // Join room
+            joinRoom: (roomCode) => {
+                socket.emit('join_room', { roomCode });
+                console.log('🚪 Joining room:', roomCode);
+            },
+            
+            // Create room
+            createRoom: (quizId) => {
+                socket.emit('create_room', { 
+                    quizId,
+                    settings: { maxPlayers: 10, timePerQuestion: 30 }
+                });
+                console.log('🏠 Creating room with quiz:', quizId);
+            },
+            
+            // Submit answer
+            submitAnswer: (roomId, questionIndex, selectedAnswer, responseTime) => {
+                socket.emit('submit_answer', {
+                    roomId, questionIndex, selectedAnswer, responseTime
+                });
+                console.log('📝 Submitting answer:', selectedAnswer);
+            },
+            
+            // Start game
+            startGame: (roomId) => {
+                socket.emit('start_game', { roomId });
+                console.log('🎮 Starting game:', roomId);
+            },
+            
+            // Disconnect
+            disconnect: () => {
+                socket.disconnect();
+                console.log('🔌 Disconnected');
+            },
+            
+            // Get status
+            getStatus: () => {
+                return {
+                    connected: socket.connected,
+                    id: socket.id
+                };
+            }
+        };
+        
+        console.log('🚀 Socket.IO test ready!');
+        console.log('Sử dụng testSocket.authenticate(token) để test');
+        console.log('Ví dụ: testSocket.authenticate("your_jwt_token")');
+    </script>
+</body>
+</html> 

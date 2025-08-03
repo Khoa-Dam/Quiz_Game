@@ -27,13 +27,13 @@ export class GameSocketService {
           
           socket.emit('authenticated', {
             success: true,
-            message: 'Xác thực thành công'
+            message: 'Authenticated successfully'
           });
           
         } catch (error) {
           socket.emit('auth_error', {
             success: false,
-            message: 'Token không hợp lệ'
+            message: 'Invalid token'
           });
         }
       });
@@ -42,7 +42,7 @@ export class GameSocketService {
       socket.on('create_room', async (data) => {
         try {
           if (!socket.authenticated) {
-            socket.emit('error', { message: 'Chưa xác thực' });
+            socket.emit('error', { message: 'Not authenticated' });
             return;
           }
           
@@ -75,7 +75,7 @@ export class GameSocketService {
       socket.on('join_room', async (data) => {
         try {
           if (!socket.authenticated) {
-            socket.emit('error', { message: 'Chưa xác thực' });
+            socket.emit('error', { message: 'Not authenticated' });
             return;
           }
           
@@ -105,7 +105,7 @@ export class GameSocketService {
           // Thông báo cho tất cả players khác
           socket.to(`room_${roomCode}`).emit('player_joined', {
             playerCount: result.room.players.length,
-            message: 'Có người chơi mới tham gia'
+            message: 'A new player has joined'
           });
           
         } catch (error) {
@@ -117,7 +117,7 @@ export class GameSocketService {
       socket.on('start_game', async (data) => {
         try {
           if (!socket.authenticated || !socket.isHost) {
-            socket.emit('error', { message: 'Chỉ host mới có thể bắt đầu game' });
+            socket.emit('error', { message: 'Only host can start the game' });
             return;
           }
           
@@ -131,7 +131,7 @@ export class GameSocketService {
           const quizResult = await quizService.getQuizForGame(result.room.quiz);
           
           if (!quizResult.success) {
-            socket.emit('error', { message: 'Không thể lấy thông tin quiz' });
+            socket.emit('error', { message: 'Cannot get quiz info' });
             return;
           }
           
@@ -139,7 +139,7 @@ export class GameSocketService {
           this.io.to(`room_${socket.roomCode}`).emit('game_started', {
             quiz: quizResult.data,
             currentQuestion: 0,
-            message: 'Game đã bắt đầu!'
+            message: 'Game has started!'
           });
           
           // Gửi câu hỏi đầu tiên
@@ -154,7 +154,7 @@ export class GameSocketService {
       socket.on('submit_answer', async (data) => {
         try {
           if (!socket.authenticated) {
-            socket.emit('error', { message: 'Chưa xác thực' });
+            socket.emit('error', { message: 'Not authenticated' });
             return;
           }
           
@@ -170,13 +170,13 @@ export class GameSocketService {
           
           // Thông báo cho room ai đã trả lời
           socket.to(`room_${socket.roomCode}`).emit('player_answered', {
-            message: 'Một người chơi đã trả lời'
+            message: 'A player has answered'
           });
           
           // Confirm cho player
           socket.emit('answer_submitted', {
             success: true,
-            message: 'Đã ghi nhận câu trả lời'
+            message: 'Answer has been recorded'
           });
           
           // Kiểm tra tất cả đã trả lời chưa
@@ -202,7 +202,7 @@ export class GameSocketService {
             
             // Thông báo cho room
             socket.to(`room_${socket.roomCode}`).emit('player_left', {
-              message: 'Một người chơi đã rời khỏi phòng'
+              message: 'A player has left the room'
             });
             
           } catch (error) {
@@ -282,7 +282,7 @@ export class GameSocketService {
         questionIndex,
         correctAnswer: 0, // Get from quiz data
         leaderboard: [], // Calculate leaderboard
-        message: 'Kết quả câu hỏi'
+        message: 'Question results'
       });
       
       // Move to next question after 3 seconds
@@ -302,7 +302,7 @@ export class GameSocketService {
     this.io.to(`room_${roomCode}`).emit('game_finished', {
       leaderboard: [], // Final leaderboard
       winner: null, // Winner info
-      message: 'Game đã kết thúc!'
+      message: 'Game has ended!'
     });
     
     // Cleanup

@@ -30,10 +30,12 @@ app.get("/", (req, res) => {
     res.send("🎮 Quiz Game API working");
 });
 
+// Swagger Documentation
+app.use('/api-ui', swaggerUi.serve, swaggerUi.setup(specs));
+
+// API Routes
 app.use("/api/v1", v1Routes);
 
-// Swagger Documentation
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 app.use(errorHandler);
 
@@ -42,6 +44,6 @@ const gameSocketService = new GameSocketService(io);
 gameSocketService.initializeEvents();
 
 server.listen(port, () => {
-    console.log(`🚀 Server is running on port ${port}`);
+    console.log(`🚀 Server is running on port http://localhost:${port}`);
     console.log(`🎮 Socket.IO ready for realtime quiz game`);
 });

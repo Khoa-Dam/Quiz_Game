@@ -8,7 +8,7 @@ export const createRoom = async (req, res) => {
     if (!quizId) {
       return res.json({
         success: false,
-        message: "Quiz ID là bắt buộc"
+        message: "Quiz ID is required"
       });
     }
     
@@ -40,7 +40,7 @@ export const joinRoom = async (req, res) => {
     if (!roomCode) {
       return res.json({
         success: false,
-        message: "Mã PIN là bắt buộc"
+        message: "Room code is required"
       });
     }
     
@@ -90,7 +90,7 @@ export const getRoomStatus = async (req, res) => {
           timePerQuestion: result.room.quiz.timePerQuestion
         }
       },
-      message: "Lấy thông tin room thành công"
+      message: "Get room info successfully"
     });
     
   } catch (error) {
