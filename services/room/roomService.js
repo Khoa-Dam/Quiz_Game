@@ -62,7 +62,8 @@ export class RoomService {
         throw new Error('Room has already started');
       }
 
-      if (room.players.length >= room.settings.maxPlayers) {
+      // Skip maxPlayers check in development
+      if (process.env.NODE_ENV !== 'development' && room.players.length >= room.settings.maxPlayers) {
         throw new Error('Room is full');
       }
 
@@ -107,12 +108,16 @@ export class RoomService {
         throw new Error('Game has already started');
       }
 
-      if (room.players.length < 2) {
-        throw new Error('At least 2 players are required');
+      // Allow single player in development
+      const minPlayers = process.env.NODE_ENV === 'development' ? 1 : 2;
+      if (room.players.length < minPlayers) {
+        throw new Error(`At least ${minPlayers} players are required`);
       }
 
       // Update room status
       room.status = 'playing';
+      room.currentQuestion = 0;  // Bắt đầu từ câu hỏi đầu tiên
+      room.questionStartTime = new Date();
       room.startedAt = new Date();
       await room.save();
 
@@ -211,6 +216,30 @@ export class RoomService {
 
     } catch (error) {
       throw new Error(`Error getting room info: ${error.message}`);
+    }
+  }
+
+  /**
+   * Update current question
+   */
+  async updateCurrentQuestion(roomId, questionIndex) {
+    try {
+      const room = await Room.findById(roomId);
+      if (!room) {
+        throw new Error('Room not found');
+      }
+
+      room.currentQuestion = questionIndex;
+      room.questionStartTime = new Date();
+      await room.save();
+
+      return {
+        success: true,
+        room,
+        message: 'Question updated successfully'
+      };
+    } catch (error) {
+      throw new Error(`Error updating question: ${error.message}`);
     }
   }
 

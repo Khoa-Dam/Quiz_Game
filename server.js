@@ -6,7 +6,7 @@ import "dotenv/config";
 import cookieParser from "cookie-parser";
 import connectDB from "./config/mongodb.js";
 import v1Routes from "./routes/v1/index.js";
-import { GameSocketService } from "./services/socket/gameSocketService.js";
+import { GameSocketService } from "./services/socket/index.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { specs, swaggerUi } from "./config/swagger.js";
 const app = express();

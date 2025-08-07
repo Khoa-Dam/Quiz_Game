@@ -119,11 +119,13 @@ export const quizService = {
       points = quiz.scoring.basePoints;
       
       if (quiz.scoring.timeBonus && responseTime) {
-        const maxTime = quiz.timePerQuestion * 1000;
+        const maxTime = 25000; // Fixed 25 seconds = 25000ms
         const timeLeft = Math.max(0, maxTime - responseTime);
         const timePercent = timeLeft / maxTime;
         const bonus = Math.round(timePercent * quiz.scoring.maxTimeBonus);
         points += bonus;
+        
+        console.log(`⏱️ Time scoring: ${responseTime}ms response, ${timeLeft}ms left, ${timePercent.toFixed(2)} time percent, +${bonus} bonus points`);
       }
     } else if (quiz.scoring.penaltyForWrong) {
       points = -quiz.scoring.wrongAnswerPenalty;
