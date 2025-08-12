@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
+import { v4 as uuidv4 } from 'uuid';
 
 export const useSocket = () => {
   const [socket, setSocket] = useState(null);
@@ -8,6 +9,11 @@ export const useSocket = () => {
   const [currentRoom, setCurrentRoom] = useState(null);
   const [gameState, setGameState] = useState('disconnected');
   const [logs, setLogs] = useState([]);
+
+  // Chat states
+  const [messages, setMessages] = useState([]);
+  const [typingUsers, setTypingUsers] = useState(new Set());
+  const [unreadCount, setUnreadCount] = useState(0);
   
   // Game data state
   const [gameData, setGameData] = useState({
@@ -196,6 +202,43 @@ export const useSocket = () => {
       addLog(`❌ Error: ${data.message}`, 'error');
     });
 
+    // Chat event listeners
+    newSocket.on('chat_message', (message) => {
+      setMessages(prev => [...prev, message]);
+      addLog(`💬 ${message.sender.name}: ${message.content}`, 'info');
+      
+      // Increment unread if not currently viewing chat
+      if (!document.hasFocus()) {
+        setUnreadCount(prev => prev + 1);
+      }
+    });
+
+    newSocket.on('typing_start', (userId) => {
+      setTypingUsers(prev => new Set([...prev, userId]));
+    });
+
+    newSocket.on('typing_end', (userId) => {
+      setTypingUsers(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(userId);
+        return newSet;
+      });
+    });
+
+    newSocket.on('message_reaction', ({ messageId, reaction, userId }) => {
+      setMessages(prev => prev.map(msg => {
+        if (msg.id === messageId) {
+          const reactions = { ...msg.reactions };
+          if (!reactions[reaction]) reactions[reaction] = [];
+          if (!reactions[reaction].includes(userId)) {
+            reactions[reaction] = [...reactions[reaction], userId];
+          }
+          return { ...msg, reactions };
+        }
+        return msg;
+      }));
+    });
+
     setSocket(newSocket);
 
     return () => {
@@ -256,6 +299,68 @@ export const useSocket = () => {
     }
   };
 
+  // Chat helpers
+  const createMessage = (content, type = 'text', replyTo = null) => {
+    return {
+      id: uuidv4(),
+      type,
+      content,
+      sender: {
+        id: socket?.id,
+        name: currentRoom?.playerName || 'Anonymous'
+      },
+      timestamp: Date.now(),
+      roomId: currentRoom?.id,
+      replyTo,
+      reactions: {}
+    };
+  };
+
+  // Chat actions
+  const sendMessage = (content, type = 'text', replyTo = null) => {
+    if (!socket || !currentRoom || !content.trim()) return;
+    
+    const message = createMessage(content, type, replyTo);
+    socket.emit('chat_message', message);
+    
+    // Optimistic update
+    setMessages(prev => [...prev, message]);
+    addLog(`💬 Sent: ${content}`, 'info');
+  };
+
+  const startTyping = () => {
+    if (!socket || !currentRoom) return;
+    socket.emit('typing_start', { roomId: currentRoom.id });
+  };
+
+  const stopTyping = () => {
+    if (!socket || !currentRoom) return;
+    socket.emit('typing_end', { roomId: currentRoom.id });
+  };
+
+  const addReaction = (messageId, reaction) => {
+    if (!socket || !currentRoom) return;
+    socket.emit('message_reaction', {
+      messageId,
+      reaction,
+      roomId: currentRoom.id
+    });
+  };
+
+  const deleteMessage = (messageId) => {
+    if (!socket || !currentRoom) return;
+    socket.emit('delete_message', {
+      messageId,
+      roomId: currentRoom.id
+    });
+    // Optimistic update
+    setMessages(prev => prev.filter(msg => msg.id !== messageId));
+  };
+
+  const clearUnreadCount = () => {
+    setUnreadCount(0);
+  };
+
   return {
     // State
     socket,
@@ -266,6 +371,11 @@ export const useSocket = () => {
     gameData,
     logs,
     
+    // Chat state
+    messages,
+    typingUsers: Array.from(typingUsers),
+    unreadCount,
+    
     // Actions
     authenticate,
     createRoom,
@@ -274,6 +384,14 @@ export const useSocket = () => {
     submitAnswer,
     disconnect,
     resetGameData,
-    clearLogs
+    clearLogs,
+    
+    // Chat actions
+    sendMessage,
+    startTyping,
+    stopTyping,
+    addReaction,
+    deleteMessage,
+    clearUnreadCount
   };
 };

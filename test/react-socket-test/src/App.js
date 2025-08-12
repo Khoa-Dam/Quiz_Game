@@ -4,7 +4,9 @@ import StatusBar from './components/StatusBar';
 import GameControls from './components/GameControls';
 import CurrentQuestion from './components/CurrentQuestion';
 import EventLogs from './components/EventLogs';
+import { ChatBox } from './components/ChatBox';
 import './App.css';
+import './styles/ChatBox.css';
 
 function App() {
   const {
@@ -60,6 +62,7 @@ function App() {
           currentRoom={currentRoom}
           submitAnswer={submitAnswer}
         />
+        <ChatBox />
       </div>
 
       {/* Event Logs */}
