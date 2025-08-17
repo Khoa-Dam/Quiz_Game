@@ -2,7 +2,16 @@
 import { tokenService } from "../services/auth/tokenService.js";
 
 const userAuth = async (req, res, next) => {
-    const token = req.cookies.token;
+    // ✅ Hỗ trợ cả cookie và Authorization header
+    let token = req.cookies.token;
+    
+    // Nếu không có cookie, kiểm tra Authorization header
+    if (!token) {
+        const authHeader = req.headers.authorization;
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            token = authHeader.substring(7); // Bỏ "Bearer " prefix
+        }
+    }
     
     if (!token) {
         return res.json({
@@ -16,6 +25,7 @@ const userAuth = async (req, res, next) => {
         req.body.userId = decoded.id;
         next();
     } catch (error) {
+        console.error('Token verification error:', error);
         return res.json({
             success: false,
             message: "Invalid token, please login again"

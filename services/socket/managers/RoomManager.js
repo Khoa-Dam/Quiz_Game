@@ -53,6 +53,7 @@ export class RoomManager {
       // Join socket room and initialize room data
       socket.join(`room_${result.roomCode}`);
       socket.roomCode = result.roomCode;
+      socket.roomId = result.room._id;
       socket.isHost = true;
       const room = this.initializeRoom(result.roomCode, result.room._id);
       
@@ -90,35 +91,56 @@ export class RoomManager {
       // Join socket room and initialize room data
       socket.join(`room_${roomCode}`);
       socket.roomCode = roomCode;
-      socket.isHost = false;
+      socket.roomId = result.room._id;
       const room = this.initializeRoom(roomCode, result.room._id);
       
-      // Add as player (only players answer questions, not host)
-      room.players.add(socket.userId);
-      console.log(`👤 Added player ${socket.userId} to room ${roomCode}. Total players: ${room.players.size} (Host: ${room.host})`);
+      // Recover host from DB if missing in RAM (after restart) and normalize id
+      const hostIdFromDb = result.room.host && (result.room.host._id ? String(result.room.host._id) : String(result.room.host));
+      if (!room.host && hostIdFromDb) {
+        room.host = hostIdFromDb;
+      }
       
-      // Thông báo cho player mới
+      // Determine host for this socket
+      socket.isHost = socket.userId === room.host;
+      
+      // Track non-host players only in RAM
+      if (!socket.isHost) {
+        room.players.add(socket.userId);
+      }
+      
+      // Build players list including host entry
+      const playersList = [
+        ...(room.host ? [{ id: room.host, name: `Player ${room.host.substring(0,8)}...`, isHost: true }] : []),
+        ...Array.from(room.players).map(id => ({ id, name: `Player ${id.substring(0,8)}...`, isHost: false }))
+      ];
+      
+      console.log(`👤 Added player ${socket.userId} to room ${roomCode}. Total players: ${playersList.length} (Host: ${room.host})`);
+      
+      // Emit to joining client with full structure
       socket.emit('room_joined', {
         success: true,
         data: {
           roomId: result.room._id,
           roomCode: result.room.roomCode,
           quizTitle: result.room.quiz.title,
-          players: result.room.players.length
+          players: playersList,
+          isHost: socket.isHost,
+          status: 'waiting'
         },
         message: result.message
       });
       
-      // Thông báo cho tất cả players khác
+      // Notify others with updated players
       socket.to(`room_${roomCode}`).emit('player_joined', {
-        playerCount: result.room.players.length,
-        message: 'A new player has joined'
+        playerCount: playersList.length,
+        playerName: `Player ${socket.userId.substring(0,8)}...`,
+        players: playersList
       });
       
     } catch (error) {
       authManager.handleError(socket, error, 'join_room');
     }
-  }
+}
 
   /**
    * Handle player disconnect from room

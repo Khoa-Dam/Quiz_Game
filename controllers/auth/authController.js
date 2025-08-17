@@ -52,12 +52,17 @@ export const login = async (req, res) => {
         // Service call
         const result = await authService.login({ email, password });
         
+        // ✅ Lấy user data
+        const user = await userModel.findOne({ email }).select('-password');
+        
         // Set cookie
         tokenService.setCookie(res, result);
 
         return res.json({
             success: true,
             message: "Login successful",
+            user: user,           // ✅ Thêm user data
+            token: result         // ✅ Thêm JWT token
         });
 
     } catch (error) {
