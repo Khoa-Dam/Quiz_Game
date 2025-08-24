@@ -60,3 +60,10 @@ Thumbs.db
 # Lock files
 yarn.lock
 package-lock.json
+
+
+#test auth
+cookies_p1.txt
+cookies_p2.txt
+cookies_player1.txt
+cookies_player2.txt
