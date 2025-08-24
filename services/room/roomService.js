@@ -52,7 +52,8 @@ export class RoomService {
     try {
       const room = await Room.findOne({ roomCode })
         .populate('quiz')
-        .populate('players', 'username email');
+        .populate('players', 'name email')
+        .populate('host', 'name email');
 
       if (!room) {
         throw new Error('Room not found');
