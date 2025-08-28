@@ -36,7 +36,7 @@ export class ScoreManager {
     }
     
     // Ghi nhận 0 điểm cho những người chưa trả lời (tất cả players trong room)
-    for (const userId of room.players) {
+    for (const userId of room.players.keys()) {
       if (!answeredUserIds.has(userId)) {
         playerResults.push({
           userId,
@@ -66,13 +66,18 @@ export class ScoreManager {
    * Calculate leaderboard from cumulative scores
    */
   calculateLeaderboard(room) {
+    const playersMap = room.players || new Map();
     // Convert to array and sort by score
     const leaderboard = Array.from(room.playerScores.entries())
-      .map(([userId, totalScore]) => ({
-        userId,
-        totalScore,
-        rank: 0 // Will be calculated after sorting
-      }))
+      .map(([userId, totalScore]) => {
+        const playerData = playersMap.get(userId) || { name: 'Player' };
+        return {
+          userId,
+          name: playerData.name,
+          totalScore,
+          rank: 0 // Will be calculated after sorting
+        }
+      })
       .sort((a, b) => b.totalScore - a.totalScore)
       .map((player, index) => ({
         ...player,

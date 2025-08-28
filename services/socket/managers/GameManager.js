@@ -42,6 +42,28 @@ export class GameManager {
   }
 
   /**
+   * Handle start countdown event
+   */
+  async handleStartCountdown(socket, data, authManager) {
+    try {
+      console.log(`[DEBUG] handleStartCountdown called for room: ${socket.roomCode}, isHost: ${socket.isHost}`);
+      if (!authManager.validateAuth(socket) || !authManager.validateHost(socket)) return;
+
+      console.log(`⏳ Countdown started for room: ${socket.roomCode}`);
+
+      // Broadcast to all players in the room to start their countdown
+      this.io.to(`room_${socket.roomCode}`).emit('countdown_started', {
+        duration: 3,
+        message: 'Game is about to start!'
+      });
+
+    } catch (error) {
+      console.error(`❌ Error starting countdown for room ${socket.roomCode}:`, error);
+      authManager.handleError(socket, error, 'start_countdown');
+    }
+  }
+
+  /**
    * Handle start game event
    */
   async handleStartGame(socket, data, authManager, roomManager) {
@@ -121,9 +143,10 @@ export class GameManager {
       totalQuestions: quiz.questions.length,
       question: {
         text: question.text,
-        options: question.options
+        options: question.options,
+        imageUrl: question.imageUrl // Add this line
       },
-      timeLimit: 25, // Fixed 25 seconds
+      timeLimit: quiz.timePerQuestion, // Use quiz's time limit
       startTime: new Date()
     });
 
@@ -132,7 +155,7 @@ export class GameManager {
     const timeoutId = setTimeout(() => {
       console.log(`⏰ 25 seconds timeout reached for room ${roomCode}, question ${questionIndex} - auto assigning 0 points for unanswered players`);
       this.showResults(roomCode, questionIndex, roomManager);
-    }, 25000); // 25 seconds fixed
+    }, quiz.timePerQuestion * 1000); // Use quiz's time limit
 
     this.questionTimeouts.set(timeoutKey, timeoutId);
     console.log(`⏱️ Set timeout for room ${roomCode}, question ${questionIndex}`);

@@ -8,7 +8,7 @@ const connectDB = async () => {
         console.log("MongoDB connection error", err);
     });
 
-    await mongoose.connect(`${process.env.MONGODB_URL}/auth`);
+    await mongoose.connect(process.env.MONGODB_URL);
 }
 
 export default connectDB;

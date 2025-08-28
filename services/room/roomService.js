@@ -52,7 +52,7 @@ export class RoomService {
     try {
       const room = await Room.findOne({ roomCode })
         .populate('quiz')
-        .populate('players', 'name email')
+        // Do not populate players initially
         .populate('host', 'name email');
 
       if (!room) {
@@ -63,19 +63,19 @@ export class RoomService {
         throw new Error('Room has already started');
       }
 
-      // Skip maxPlayers check in development
-      if (process.env.NODE_ENV !== 'development' && room.players.length >= room.settings.maxPlayers) {
-        throw new Error('Room is full');
+      // room.players is an array of ObjectIds
+      const isPlayerInRoom = room.players.some(playerId => playerId.toString() === userId);
+
+      if (!isPlayerInRoom) {
+        if (process.env.NODE_ENV !== 'development' && room.players.length >= room.settings.maxPlayers) {
+          throw new Error('Room is full');
+        }
+        room.players.push(userId);
+        await room.save();
       }
 
-      // Check if user is already in room
-      if (room.players.includes(userId)) {
-        throw new Error('You are already in this room');
-      }
-
-      // Add player to room
-      room.players.push(userId);
-      await room.save();
+      // Now populate players to return the full list
+      await room.populate('players', 'name email');
 
       return {
         success: true,

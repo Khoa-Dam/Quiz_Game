@@ -34,6 +34,25 @@ export const createQuiz = async (req, res) => {
   }
 };
 
+export const getQuizById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await quizService.getQuizById(id);
+    
+    return res.json({
+      success: true,
+      data: result.quiz,
+      message: result.message
+    });
+    
+  } catch (error) {
+    return res.json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
 export const getAllQuizzes = async (req, res) => {
   try {
     const { userId } = req.query;

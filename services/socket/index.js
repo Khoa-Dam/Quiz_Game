@@ -36,6 +36,10 @@ export class GameSocketService {
       });
 
       // ============ GAME CONTROL ============
+      socket.on('start_countdown', async (data) => {
+        await this.gameManager.handleStartCountdown(socket, data, this.authManager);
+      });
+
       socket.on('start_game', async (data) => {
         await this.gameManager.handleStartGame(socket, data, this.authManager, this.roomManager);
       });
