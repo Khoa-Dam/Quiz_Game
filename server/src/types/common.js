@@ -5,7 +5,7 @@
  */
 export const ROOM_STATUS = {
   WAITING: 'waiting',
-  PLAYING: 'playing', 
+  PLAYING: 'playing',
   PAUSED: 'paused',
   FINISHED: 'finished'
 };
@@ -62,7 +62,7 @@ export const VALIDATION_RULES = {
     PATTERN: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/
   },
   ROOM_CODE: /^[A-Z0-9]{6}$/,
-  USERNAME: {
+  name: {
     MIN_LENGTH: 3,
     MAX_LENGTH: 30,
     PATTERN: /^[a-zA-Z0-9_-]+$/

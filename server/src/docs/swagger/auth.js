@@ -16,7 +16,7 @@
  *               summary: Register new user
  *               description: Example for registering a new user
  *               value:
- *                 username: "testuser"
+ *                 name: "testuser"
  *                 email: "test@example.com"
  *                 password: "password123"
  *     responses:
@@ -42,7 +42,7 @@
  *                         _id:
  *                           type: string
  *                           example: "64f8a1b2c3d4e5f6a7b8c9d0"
- *                         username:
+ *                         name:
  *                           type: string
  *                           example: "testuser"
  *                         email:
@@ -105,7 +105,7 @@
  *                         _id:
  *                           type: string
  *                           example: "64f8a1b2c3d4e5f6a7b8c9d0"
- *                         username:
+ *                         name:
  *                           type: string
  *                           example: "testuser"
  *                         email:
@@ -408,7 +408,7 @@
  *                         _id:
  *                           type: string
  *                           example: "64f8a1b2c3d4e5f6a7b8c9d0"
- *                         username:
+ *                         name:
  *                           type: string
  *                           example: "testuser"
  *                         email:
