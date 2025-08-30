@@ -1,4 +1,4 @@
-import { tokenService } from "../../../modules/auth/tokenService.js";
+import { tokenService } from "../../../modules/auth/token.Service.js";
 
 export class AuthManager {
   constructor() { }

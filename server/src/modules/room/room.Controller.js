@@ -1,4 +1,4 @@
-import { roomService } from "./roomService.js";
+import { roomService } from "./room.Service.js";
 
 export const createRoom = async (req, res) => {
   try {

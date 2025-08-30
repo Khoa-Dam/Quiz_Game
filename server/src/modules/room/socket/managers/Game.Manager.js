@@ -1,4 +1,4 @@
-import { roomService } from "../../../room/roomService.js";
+import { roomService } from "../../room.Service.js";
 import { quizService } from "../../../quiz/quizService.js";
 
 export class GameManager {
@@ -218,7 +218,7 @@ export class GameManager {
   async showResults(roomCode, questionIndex, roomManager, scoreManager = null) {
     // Use instance scoreManager if not provided
     if (!scoreManager) {
-      const { ScoreManager } = await import('./ScoreManager.js');
+      const { ScoreManager } = await import('./Score.Manager.js');
       scoreManager = new ScoreManager();
     }
     try {
@@ -287,7 +287,7 @@ export class GameManager {
   endGame(roomCode, roomManager, scoreManager = null) {
     // Use instance scoreManager if not provided
     if (!scoreManager) {
-      const { ScoreManager } = require('./ScoreManager.js');
+      const { ScoreManager } = require('./Score.Manager.js');
       scoreManager = new ScoreManager();
     }
     console.log(`🏁 Game ended for room: ${roomCode}`);

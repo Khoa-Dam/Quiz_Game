@@ -1,5 +1,4 @@
-import Quiz from "./quizModel.js";
-import Question from "./questionModel.js";
+import { Quiz, Question } from "../../models/index.js";
 
 export const quizService = {
   /**

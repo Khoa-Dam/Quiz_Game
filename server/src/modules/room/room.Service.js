@@ -1,6 +1,5 @@
-import Room from "./roomModel.js";
-import Quiz from "../quiz/quizModel.js";
-import User from "../users/userModel.js";
+
+import { Room, Quiz } from "../../models/index.js";
 
 export class RoomService {
   /**

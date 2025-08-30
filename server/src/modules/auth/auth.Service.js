@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
-import userModel from "../users/userModel.js";
-import { emailService } from "./emailService.js";
-import { tokenService } from "./tokenService.js";
+import { User } from "../../models/index.js";
+import { emailService } from "./email.Service.js";
+import { tokenService } from "./token.Service.js";
 import { generateOTP, validatePassword } from "../../utils/authUtils.js";
 
 export const authService = {
@@ -14,7 +14,7 @@ export const authService = {
         }
 
         //Check user already exists
-        const existingUser = await userModel.findOne({ email });
+        const existingUser = await User.findOne({ email });
         if (existingUser) {
             throw new Error("User already exists");
         }
@@ -28,7 +28,7 @@ export const authService = {
         //Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const newUser = new userModel({ name, email, password: hashedPassword });
+        const newUser = new User({ name, email, password: hashedPassword });
         await newUser.save();
 
         const token = tokenService.createToken(newUser._id);
@@ -42,7 +42,7 @@ export const authService = {
     async login(credentials) {
         const { email, password } = credentials;
 
-        const user = await userModel.findOne({ email });
+        const user = await User.findOne({ email });
         if (!user) {
             throw new Error("User not found");
         }
@@ -60,7 +60,7 @@ export const authService = {
 
     // Send OTP verification
     async sendVerifyOTP(userId) {
-        const user = await userModel.findById(userId);
+        const user = await User.findById(userId);
         if (!user) {
             throw new Error("User not found");
         }
@@ -82,7 +82,7 @@ export const authService = {
 
     // Xác thực email
     async verifyEmail(userId, otp) {
-        const user = await userModel.findById(userId);
+        const user = await User.findById(userId);
         if (!user) {
             throw new Error("User not found");
         }
@@ -109,7 +109,7 @@ export const authService = {
 
     // Gửi OTP reset password
     async sendResetOTP(email) {
-        const user = await userModel.findOne({ email });
+        const user = await User.findOne({ email });
         if (!user) {
             throw new Error("Email not found");
         }
@@ -127,7 +127,7 @@ export const authService = {
 
     // Reset password
     async resetPassword(email, otp, newPassword) {
-        const user = await userModel.findOne({ email });
+        const user = await User.findOne({ email });
         if (!user) {
             throw new Error("Email not found");
         }
@@ -153,5 +153,48 @@ export const authService = {
         await user.save();
 
         return { message: "Reset password successful" };
-    }
+    },
+
+    async findOrCreateGoogleUser(profile) {
+        // profile: { googleId, email, name, avatar, emailVerified }
+        if (!profile?.googleId || !profile?.email) {
+            throw new Error("Invalid Google profile");
+        }
+
+        // 1) Ưu tiên theo googleId
+        let user = await User.findOne({ googleId: profile.googleId });
+
+        // 2) Fallback theo email (nên chỉ link nếu emailVerified=true)
+        if (!user) {
+            user = await User.findOne({ email: profile.email });
+        }
+
+        if (user) {
+            // LINK Google nếu chưa có
+            if (!user.googleId) user.googleId = profile.googleId;
+
+            // Nếu user chưa có password (tạo từ Google), provider là GOOGLE cho rõ ràng
+            if (!user.password) user.provider = "GOOGLE";
+
+            if (!user.name && profile.name) user.name = profile.name;
+            if (!user.avatar && profile.avatar) user.avatar = profile.avatar;
+
+            // Map email_verified → isAccountVerified (không hạ thấp nếu true rồi)
+            user.isAccountVerified = user.isAccountVerified || !!profile.emailVerified;
+
+            await user.save();
+            return user;
+        }
+
+        // 3) Không có user nào → tạo mới theo Google
+        return await User.create({
+            name: profile.name || profile.email.split("@")[0],
+            email: profile.email,
+            provider: "GOOGLE",
+            googleId: profile.googleId,
+            avatar: profile.avatar || null,
+            isAccountVerified: !!profile.emailVerified,
+            // password: null (mặc định)
+        });
+    },
 };

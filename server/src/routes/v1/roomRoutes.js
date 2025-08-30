@@ -1,5 +1,5 @@
 import express from "express";
-import { createRoom, joinRoom, getRoomStatus } from "../../modules/room/roomController.js";
+import { createRoom, joinRoom, getRoomStatus } from "../../modules/room/room.Controller.js";
 import userAuth from "../../middleware/userAuth.js";
 
 const roomRouter = express.Router();

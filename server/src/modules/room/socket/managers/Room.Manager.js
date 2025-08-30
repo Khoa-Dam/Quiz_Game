@@ -1,4 +1,4 @@
-import { roomService } from "../../../room/roomService.js";
+import { roomService } from "../../room.Service.js";
 
 export class RoomManager {
   constructor(io) {

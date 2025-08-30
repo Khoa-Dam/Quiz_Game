@@ -7,7 +7,7 @@ import {
   updateQuiz,
   deleteQuiz,
   getQuizById
-} from "../../modules/quiz/quizController.js";
+} from "../../modules/quiz/quiz.Controller.js";
 import userAuth from "../../middleware/userAuth.js";
 
 const quizRouter = express.Router();

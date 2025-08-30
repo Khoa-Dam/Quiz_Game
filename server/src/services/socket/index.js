@@ -1,7 +1,7 @@
 import { AuthManager } from "./managers/AuthManager.js";
-import { RoomManager } from "../../modules/room/socket/managers/RoomManager.js";
-import { GameManager } from "../../modules/room/socket/managers/GameManager.js";
-import { ScoreManager } from "../../modules/room/socket/managers/ScoreManager.js";
+import { RoomManager } from "../../modules/room/socket/managers/Room.Manager.js";
+import { GameManager } from "../../modules/room/socket/managers/Game.Manager.js";
+import { ScoreManager } from "../../modules/room/socket/managers/Score.Manager.js";
 
 export class GameSocketService {
   constructor(io) {
