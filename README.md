@@ -1,3 +1,43 @@
+# Quiz_website_nhom1
+
+Công nghệ dự kiến
+Server: Node.js + Socket.IO (WebSocket).
+Client: Next.js (React) + Socket.IO-client.
+Lưu trữ câu hỏi: File JSON hoặc mảng cứng trong code server.
+Công cụ quản lý Git: GitHub/GitLab.
+Giao diện: Next.js với Tailwind CSS (hoặc CSS module) để tạo giao diện đẹp, đơn giản.
+
+Thông tin thành viên nhóm 4 người gồm : Phúc , Khoa , Phát , Hoà
+
+## Giới thiệu
+
+Chúng em sử dụng Node.js và Socket.IO cho phần server để đảm bảo tốc độ phản hồi nhanh, đồng thời xây dựng giao diện hiện đại với Next.js và Tailwind CSS. Dữ liệu câu hỏi được lưu trữ linh hoạt bằng file JSON hoặc trực tiếp trong code, giúp dễ dàng mở rộng và cập nhật nội dung.
+
+Dự án này không chỉ là nơi để luyện tập kỹ năng lập trình mà còn là cơ hội để các thành viên học hỏi, phối hợp và phát triển các kỹ năng làm việc nhóm trong môi trường thực tế.
+
+Node.js là một môi trường chạy JavaScript phía máy chủ (server-side). Thay vì chạy JavaScript chỉ trong trình duyệt (như trước đây), Node.js cho phép bạn viết ứng dụng backend bằng JavaScript và chạy trực tiếp trên máy tính của bạn hoặc trên server.
+
+# 🎯 QuizMaster - React Quiz Application
+
+A modern, interactive quiz application built with React featuring user authentication, responsive design, and beautiful UI.
+
+## 🚀 Features
+
+## Giới thiệu
+
+Chúng em sử dụng Node.js và Socket.IO cho phần server để đảm bảo tốc độ phản hồi nhanh, đồng thời xây dựng giao diện hiện đại với Next.js và Tailwind CSS. Dữ liệu câu hỏi được lưu trữ linh hoạt bằng file JSON hoặc trực tiếp trong code, giúp dễ dàng mở rộng và cập nhật nội dung.
+
+### 🎨 UI/UX Features
+
+-   **📱 Fully Responsive** - Mobile-first design approach
+-   **🎨 Modern Design** - Gradient backgrounds and smooth animations
+-   **🧭 Navigation Header** - Sticky header with user menu
+-   **💾 Persistent State** - LocalStorage for user sessions
+-   **🔄 Modal System** - Login/Register/Profile modals
+-   **⚡ Loading States** - Smooth transitions and feedback
+
+Node.js là một môi trường chạy JavaScript phía máy chủ (server-side). Thay vì chạy JavaScript chỉ trong trình duyệt (như trước đây), Node.js cho phép bạn viết ứng dụng backend bằng JavaScript và chạy trực tiếp trên máy tính của bạn hoặc trên server.
+
 # 🎯 QuizMaster - React Quiz Application
 
 A modern, interactive quiz application built with React featuring user authentication, responsive design, and beautiful UI.
@@ -5,20 +45,22 @@ A modern, interactive quiz application built with React featuring user authentic
 ## 🚀 Features
 
 ### ✨ Core Features
-- **🎮 Interactive Quiz System** - Multiple-choice questions with scoring
-- **🔐 User Authentication** - Login/Register with persistent sessions
-- **👤 User Profiles** - Avatar generation and profile management
-- **📊 Score Tracking** - Real-time scoring and quiz statistics
-- **⏱️ Countdown Timer** - Pre-quiz countdown for better UX
-- **🏆 End Game Summary** - Detailed results and restart options
+
+-   **🎮 Interactive Quiz System** - Multiple-choice questions with scoring
+-   **🔐 User Authentication** - Login/Register with persistent sessions
+-   **👤 User Profiles** - Avatar generation and profile management
+-   **📊 Score Tracking** - Real-time scoring and quiz statistics
+-   **⏱️ Countdown Timer** - Pre-quiz countdown for better UX
+-   **🏆 End Game Summary** - Detailed results and restart options
 
 ### 🎨 UI/UX Features
-- **📱 Fully Responsive** - Mobile-first design approach
-- **🎨 Modern Design** - Gradient backgrounds and smooth animations
-- **🧭 Navigation Header** - Sticky header with user menu
-- **💾 Persistent State** - LocalStorage for user sessions
-- **🔄 Modal System** - Login/Register/Profile modals
-- **⚡ Loading States** - Smooth transitions and feedback
+
+-   **📱 Fully Responsive** - Mobile-first design approach
+-   **🎨 Modern Design** - Gradient backgrounds and smooth animations
+-   **🧭 Navigation Header** - Sticky header with user menu
+-   **💾 Persistent State** - LocalStorage for user sessions
+-   **🔄 Modal System** - Login/Register/Profile modals
+-   **⚡ Loading States** - Smooth transitions and feedback
 
 ## 🏗️ Project Structure
 
@@ -50,13 +92,15 @@ Quiz/
 The new Header component provides a complete authentication system:
 
 ### Authentication Features
-- **Login Modal** - Username/password authentication
-- **Register Modal** - Full registration with validation
-- **User Profile** - Avatar, name, email management
-- **Session Management** - Persistent login state
-- **Logout** - Clean session termination
+
+-   **Login Modal** - Username/password authentication
+-   **Register Modal** - Full registration with validation
+-   **User Profile** - Avatar, name, email management
+-   **Session Management** - Persistent login state
+-   **Logout** - Clean session termination
 
 ### Usage Example
+
 ```jsx
 <Header
     isAuthenticated={isAuthenticated}
@@ -69,6 +113,7 @@ The new Header component provides a complete authentication system:
 ```
 
 ### User Object Structure
+
 ```javascript
 {
     id: number,
@@ -89,10 +134,12 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 ## 🛠️ Installation & Setup
 
 ### Prerequisites
-- Node.js (v14 or higher)
-- npm or yarn package manager
+
+-   Node.js (v14 or higher)
+-   npm or yarn package manager
 
 ### Quick Start
+
 ```bash
 # Clone the repository
 git clone <your-repo-url>
@@ -177,39 +224,45 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/t
 ## 🧪 Testing the Application
 
 ### Manual Testing Checklist
-- ✅ **Header Authentication**
-  - Click "Đăng nhập" → Test login modal
-  - Click "Đăng ký" → Test registration modal
-  - Test form validation (empty fields, invalid email)
-  - Test modal switching (Login ↔ Register)
-  - Test user profile dropdown after login
 
-- ✅ **Quiz Flow**
-  - Start quiz from lobby
-  - Answer questions and check scoring
-  - Complete quiz and view results
-  - Test restart functionality
+-   ✅ **Header Authentication**
 
-- ✅ **Responsive Design**
-  - Test on mobile devices (< 480px)
-  - Test on tablets (481px - 768px)
-  - Test hamburger menu on mobile
-  - Test modal responsiveness
+    -   Click "Đăng nhập" → Test login modal
+    -   Click "Đăng ký" → Test registration modal
+    -   Test form validation (empty fields, invalid email)
+    -   Test modal switching (Login ↔ Register)
+    -   Test user profile dropdown after login
+
+-   ✅ **Quiz Flow**
+
+    -   Start quiz from lobby
+    -   Answer questions and check scoring
+    -   Complete quiz and view results
+    -   Test restart functionality
+
+-   ✅ **Responsive Design**
+    -   Test on mobile devices (< 480px)
+    -   Test on tablets (481px - 768px)
+    -   Test hamburger menu on mobile
+    -   Test modal responsiveness
 
 ## 🚀 Deployment
 
 ### Build for Production
+
 ```bash
 npm run build
 ```
 
 ### Deploy to Netlify
+
 1. Build the project: `npm run build`
 2. Upload `build` folder to Netlify
 3. Set build command: `npm run build`
 4. Set publish directory: `build`
 
 ### Deploy to Vercel
+
 ```bash
 npm install -g vercel
 vercel --prod
@@ -218,6 +271,7 @@ vercel --prod
 ## 🎨 Customization
 
 ### Theming
+
 You can customize the header colors by modifying CSS variables in `Header.css`:
 
 ```css
@@ -229,6 +283,7 @@ You can customize the header colors by modifying CSS variables in `Header.css`:
 ```
 
 ### Adding New Questions
+
 Edit the `mockQuestions` array in `App.js`:
 
 ```javascript
@@ -240,8 +295,8 @@ const mockQuestions = [
             { answerText: 'Option 1', isCorrect: false },
             { answerText: 'Correct Answer', isCorrect: true },
             // ... more options
-        ]
-    }
+        ],
+    },
 ];
 ```
 

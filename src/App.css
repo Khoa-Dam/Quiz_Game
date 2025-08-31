@@ -28,8 +28,8 @@
 
 /* Add margin-top to account for fixed header */
 .main-content {
-  margin-top: 70px;
-  min-height: calc(100vh - 70px);
+  margin-top: 68px;
+  min-height: calc(100vh - 68px);
 }
 
 /* Responsive header spacing */
@@ -44,13 +44,14 @@
 body {
   margin: 0;
   padding: 0;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: var(--background-color);
   min-height: 100vh;
 }
 
 .App {
   position: relative;
   min-height: 100vh;
+  background-color: var(--background-color);
 }
 
 /* Enhance modal styles to match header theme */

@@ -1,3 +1,33 @@
+:root {
+  --background-color: #f5f7fa;
+  --text-color: #111;
+  --header-bg: #fff;
+  --header-border: #eee;
+  --modal-bg: #fff;
+  --input-bg: #fff;
+  --input-border: #ccc;
+  --button-bg: #2196F3;
+  --button-text: #fff;
+  --switch-bg: #ccc;
+  --switch-slider: #fff;
+  --switch-checked-bg: #2196F3;
+}
+
+body.dark-mode {
+  --background-color: #121212;
+  --text-color: #fff;
+  --header-bg: #1e1e1e;
+  --header-border: #333;
+  --modal-bg: #1e1e1e;
+  --input-bg: #333;
+  --input-border: #555;
+  --button-bg: #2196F3;
+  --button-text: #fff;
+  --switch-bg: #555;
+  --switch-slider: #ccc;
+  --switch-checked-bg: #2196F3;
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -5,6 +35,9 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  transition: background-color 0.25s, color 0.25s;
 }
 
 code {

@@ -1,0 +1,213 @@
+.edit-profile-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.edit-profile-content {
+    background: white;
+    padding: 1.4rem;
+    border-radius: 12px;
+    width: min(92vw, 520px);
+    max-height: 90vh;
+    overflow: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+}
+
+.edit-profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 1rem;
+}
+
+.edit-profile-header h2 {
+    margin-top: 0.5rem;
+    font-size: 1.8rem;
+}
+
+.close-btn {
+    background: transparent;
+    border: none;
+    font-size: 1.6rem;
+    padding: 6px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-bottom: 20px;
+}
+
+.close-btn:hover {
+    background: #f55a6a;
+}
+
+.avatar-section {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin-bottom: 1.1rem;
+}
+
+.avatar-preview {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #eee;
+}
+
+#avatarUpload {
+    display: none;
+}
+
+.upload-btn {
+    background-color: #4f46e5;
+    color: white;
+    padding: 10px 15px;
+    height: 45px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: inline-block;
+    transition: background-color 0.3s ease;
+}
+
+.upload-btn:hover {
+    background-color: #7d74db;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+    margin-top: 0.8rem;
+}
+
+.form-group label {
+    display: inline-block;
+    margin-bottom: 0.5rem;
+    color: #666;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.form-group label:has(+ input[required])::after {
+    display: inline-block;
+    content: '*';
+    background: none;
+    color: red;
+    margin-left: 3px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.2rem;
+}
+
+.submit-btn,
+.cancel-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.submit-btn {
+    background-color: #28a745;
+    color: white;
+}
+
+.cancel-btn {
+    background-color: #dc3545;
+    color: white;
+}
+
+.form-footer {
+    text-align: center;
+    margin: 1.2rem auto;
+}
+
+.form-footer p {
+    color: #333;
+    margin: 0.5rem auto;
+}
+
+.form-footer p button {
+    margin-left: 0.2rem;
+    background-color: transparent;
+    outline: none;
+    border: none;
+    color: rgb(54, 54, 196);
+    font-size: 1.1rem;
+    font-family: 'Press Start 2P', monospace;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.form-footer p button:hover,
+.form-footer .forgot-password:hover {
+    color: rgb(112, 112, 230);
+    text-decoration: underline;
+}
+
+.form-footer .forgot-password {
+    margin-top: 1rem;
+    text-decoration: none;
+    font-size: 1.1rem;
+    font-family: 'Press Start 2P', monospace;
+}
+
+/* Styles for View Mode */
+.view-profile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.info-group {
+    width: 100%;
+    margin-bottom: 0.5rem;
+    padding: 10px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.info-group:nth-child(3) {
+    border-top: none;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.info-group label {
+    display: block;
+    color: #666;
+    font-size: 1.1rem;
+    margin-bottom: 0.3rem;
+    font-weight: bold;
+}
+
+.info-group p {
+    font-size: 1.2rem;
+    color: #333;
+    margin: 0;
+    /* Remove default paragraph margin */
+}
+
+/* Center the edit button in view mode */
+.view-profile .form-actions {
+    justify-content: center;
+    width: 100%;
+}
