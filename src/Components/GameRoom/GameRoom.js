@@ -2,10 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 import './GameRoom.css';
 
-const GameRoom = ({ roomCode, quizId, user, playerName, onBackToLobby }) => {
+const GameRoom = ({ roomCode, quizId, playerName, onBackToLobby, isAuthenticated, user }) => {
     const [socket, setSocket] = useState(null);
     const [connected, setConnected] = useState(false);
-    const [authenticated, setAuthenticated] = useState(false);
+    const [isConnecting, setIsConnecting] = useState(true); // ✅ Thêm state này
     const [gameState, setGameState] = useState('waiting'); // waiting, playing, finished
     const [players, setPlayers] = useState([]);
     const [currentQuestion, setCurrentQuestion] = useState(null);
@@ -54,172 +54,211 @@ const GameRoom = ({ roomCode, quizId, user, playerName, onBackToLobby }) => {
 
     // Initialize Socket.IO connection
     useEffect(() => {
-        const newSocket = io('http://localhost:3000');
-        socketRef.current = newSocket;
+        if (isAuthenticated && roomCode) {
+            console.log('🚀 GameRoom: Initializing Socket.IO connection...');
+            setIsConnecting(true); // ✅ Set connecting state
+            
+            const newSocket = io('http://localhost:4000');
+            socketRef.current = newSocket;
 
-        // Connection events
-        newSocket.on('connect', () => {
-            console.log('✅ Connected to Socket.IO server');
-            setConnected(true);
-            setSocket(newSocket); // Thêm dòng này để đảm bảo socket được set ngay khi kết nối
-            addGameLog('✅ Kết nối thành công với server', 'success');
+            // Connection events
+            newSocket.on('connect', () => {
+                console.log('✅ GameRoom: Connected to Socket.IO server');
+                setConnected(true);
+                setIsConnecting(false); // ✅ Set connecting = false khi kết nối thành công
+                setSocket(newSocket);
+                addGameLog('✅ Kết nối thành công với server', 'success');
 
-            // Authenticate with JWT token
-            const token = localStorage.getItem('quiz_token');
-            if (token) {
-                newSocket.emit('authenticate', { token });
-            }
-        });
+                // ✅ Xử lý cả 2 loại authentication
+                const token = localStorage.getItem('quiz_token');
+                if (token) {
+                    // JWT token authentication (Email/Password login)
+                    console.log('🔑 GameRoom: JWT token authentication');
+                    newSocket.emit('authenticate', { token });
+                } else {
+                    // Google OAuth authentication (Cookie-based)
+                    console.log('🔑 GameRoom: Google OAuth authentication');
+                    const userInfo = {
+                        userId: user?._id,
+                        email: user?.email,
+                        name: user?.name,
+                        isGoogleOAuth: true
+                    };
+                    console.log('📤 GameRoom: Sending user info:', userInfo);
+                    newSocket.emit('authenticate', userInfo);
+                }
 
-        newSocket.on('disconnect', () => {
-            console.log('❌ Disconnected from server');
-            setConnected(false);
-            setAuthenticated(false);
-            addGameLog('❌ Mất kết nối với server', 'error');
-        });
-
-        // Authentication events
-        newSocket.on('authenticated', (data) => {
-            console.log('✅ Authenticated successfully:', data);
-            setAuthenticated(true);
-            addGameLog('✅ Xác thực thành công', 'success');
-
-            // Join room after authentication
-            newSocket.emit('join_room', { roomCode, playerName: playerNameRef.current });
-        });
-
-        // Room events - Match với backend events
-        newSocket.on('room_created', (res) => {
-            alert(`✅ Phòng đã được tạo thành công! Room Code: ${res.data.roomCode}`);
-            onBackToLobby();
-        });
-
-        newSocket.on('room_joined', (res) => {
-            console.log('Room joined data:', res); // Thêm log để debug
-            setRoomId(res.data?.roomId || '');
-            const incoming = Array.isArray(res.data?.players) ? res.data.players : [];
-            setPlayers(incoming);
-            setIsHost(res.data?.isHost || false);
-            setGameState(res.data?.status || 'waiting');
-            addGameLog(`🏠 Đã tham gia phòng ${roomCode}`, 'info');
-        });
-
-        newSocket.on('player_joined', (data) => {
-            const incoming = Array.isArray(data.players) ? data.players : [];
-            setPlayers(incoming);
-            addGameLog(`${data.playerName || 'Player'} đã tham gia phòng`, 'info');
-        });
-
-        newSocket.on('player_left', (data) => {
-            if (Array.isArray(data.players)) {
-                setPlayers(data.players);
-            }
-            addGameLog(`${data.playerName || 'Player'} đã rời phòng`, 'info');
-        });
-
-        // Game events - Match với backend GameManager
-        newSocket.on('countdown_started', (data) => {
-            console.log('⏳ Countdown started received from server:', data);
-            setGameState('countdown');
-            setCountdown(3);
-            addGameLog('⏳ Trò chơi sắp bắt đầu...', 'info');
-        });
-
-        newSocket.on('game_started', (data) => {
-            console.log('🎮 Game started:', data);
-            setGameState('playing');
-            setTotalQuestions(data.totalQuestions || data.quiz?.questions?.length || 0);
-            setCurrentQuestionIndex(0);
-            setCountdown(null); // Reset countdown khi game bắt đầu
-            addGameLog('🎮 Trò chơi đã bắt đầu!', 'success');
-        });
-
-        // ✅ Match với backend event 'new_question'
-        newSocket.on('new_question', (data) => {
-            console.log('❓ New question received:', data);
-            setCurrentQuestion({
-                questionIndex: data.questionIndex,
-                totalQuestions: data.totalQuestions,
-                question: data.question,
-                timeLimit: data.timeLimit,
-                startTime: data.startTime,
-                image: data.question.imageUrl,
+                // Join room
+                newSocket.emit('join_room', { roomCode, playerName: playerNameRef.current, quizId });
             });
-            setSelectedAnswer(null);
-            setQuestionTimer(data.timeLimit || 25);
-            setCurrentQuestionIndex(data.questionIndex);
-            setCorrectAnswerIndex(null);
-            addGameLog(`❓ Câu hỏi ${data.questionIndex + 1}/${data.totalQuestions}`, 'info');
 
-            // Start countdown timer
-            startQuestionTimer(data.timeLimit || 25);
-        });
+            newSocket.on('connect_error', (error) => {
+                console.error('❌ GameRoom: Connection error:', error);
+                setIsConnecting(false); // ✅ Set connecting = false khi có lỗi
+                addGameLog('❌ Lỗi kết nối với server', 'error');
+            });
 
-        // ✅ Match với backend event 'answer_submitted'
-        newSocket.on('answer_submitted', (data) => {
-            console.log('📝 Answer submitted:', data);
-            if (data.success) {
-                addGameLog(' Đã gửi câu trả lời thành công', 'success');
-            }
-        });
+            newSocket.on('disconnect', () => {
+                console.log('❌ Disconnected from server');
+                setConnected(false);
+                addGameLog('❌ Mất kết nối với server', 'error');
+            });
 
-        // ✅ Match với backend event 'question_results'
-        newSocket.on('question_results', (data) => {
-            console.log('📊 Question results:', data);
-            setLeaderboard(data.leaderboard || []);
+            // Authentication events
+            newSocket.on('authenticated', (data) => {
+                console.log('✅ GameRoom: Authenticated successfully:', data);
+                // ✅ BỎ setAuthenticated(true) - không cần nữa
+                addGameLog('✅ Xác thực thành công', 'success');
+            });
 
-            // Update player score
-            const playerResult = data.playerResults?.find((p) => p.userId === user._id);
-            if (playerResult) {
-                setPlayerScore((prev) => prev + playerResult.points);
-                addGameLog(`🎯 Điểm câu này: +${playerResult.points}`, 'success');
-            }
+            newSocket.on('auth_error', (error) => {
+                console.error('❌ GameRoom: Authentication error:', error);
+                addGameLog(`❌ Lỗi xác thực: ${error.message}`, 'error');
+            });
 
-            console.log('Correct Answer Index from server:', data.correctAnswer); // ADDED FOR DEBUGGING
-            setCorrectAnswerIndex(data.correctAnswer); // server cần trả về correctAnswerIndex
-            addGameLog('📊 Kết quả câu hỏi', 'info');
+            // Room events - Match với backend events
+            newSocket.on('room_created', (res) => {
+                alert(`✅ Phòng đã được tạo thành công! Room Code: ${res.data.roomCode}`);
+                onBackToLobby();
+            });
 
-            // Clear timer
-            if (timerRef.current) {
-                clearInterval(timerRef.current);
-            }
+            newSocket.on('room_joined', (res) => {
+                console.log('Room joined data:', res); // Thêm log để debug
+                setRoomId(res.data?.roomId || '');
+                const incoming = Array.isArray(res.data?.players) ? res.data.players : [];
+                setPlayers(incoming);
+                
+                // ✅ Sửa: Set isHost từ backend response
+                const isHostFromBackend = res.data?.isHost || false;
+                setIsHost(isHostFromBackend);
+                console.log('👑 GameRoom: Host status set to:', isHostFromBackend);
+                
+                setGameState(res.data?.status || 'waiting');
+                addGameLog(`🏠 Đã tham gia phòng ${roomCode}`, 'info');
+            });
 
-            // Add 4-second delay to show results before clearing for next question
-            setTimeout(() => {
-                setCurrentQuestion(null); // Clear current question to prepare for next
-                setCorrectAnswerIndex(null); // Hide correct answer highlight
-                setSelectedAnswer(null); // Clear selected answer
-            }, 4000); // 4 giây delay để hiển thị đáp án
-        });
+            newSocket.on('player_joined', (data) => {
+                const incoming = Array.isArray(data.players) ? data.players : [];
+                setPlayers(incoming);
+                addGameLog(`${data.playerName || 'Player'} đã tham gia phòng`, 'info');
+            });
 
-        // ✅ Match với backend event 'game_finished'
-        newSocket.on('game_finished', (data) => {
-            console.log('🏁 Game finished:', data);
-            setGameState('finished');
-            setLeaderboard(data.leaderboard || []);
-            addGameLog(' Trò chơi kết thúc!', 'success');
-        });
+            newSocket.on('player_left', (data) => {
+                if (Array.isArray(data.players)) {
+                    setPlayers(data.players);
+                }
+                addGameLog(`${data.playerName || 'Player'} đã rời phòng`, 'info');
+            });
 
-        // Error events
-        newSocket.on('error', (data) => {
-            console.error('❌ Socket error:', data);
-            addGameLog(`❌ Lỗi: ${data.message}`, 'error');
-        });
+            // Game events - Match với backend GameManager
+            newSocket.on('countdown_started', (data) => {
+                console.log('⏳ Countdown started received from server:', data);
+                setGameState('countdown');
+                setCountdown(3);
+                addGameLog('⏳ Trò chơi sắp bắt đầu...', 'info');
+            });
 
-        newSocket.on('auth_error', (data) => {
-            console.error('❌ Auth error:', data);
-            addGameLog(`❌ Lỗi xác thực: ${data.message}`, 'error');
-        });
+            newSocket.on('game_started', (data) => {
+                console.log('🎮 Game started:', data);
+                setGameState('playing');
+                setTotalQuestions(data.totalQuestions || data.quiz?.questions?.length || 0);
+                setCurrentQuestionIndex(0);
+                setCountdown(null); // Reset countdown khi game bắt đầu
+                addGameLog('🎮 Trò chơi đã bắt đầu!', 'success');
+            });
 
-        setSocket(newSocket);
+            // ✅ Match với backend event 'new_question'
+            newSocket.on('new_question', (data) => {
+                console.log('❓ New question received:', data);
+                setCurrentQuestion({
+                    questionIndex: data.questionIndex,
+                    totalQuestions: data.totalQuestions,
+                    question: data.question,
+                    timeLimit: data.timeLimit,
+                    startTime: data.startTime,
+                    image: data.question.imageUrl,
+                });
+                setSelectedAnswer(null);
+                setQuestionTimer(data.timeLimit || 25);
+                setCurrentQuestionIndex(data.questionIndex);
+                setCorrectAnswerIndex(null);
+                addGameLog(`❓ Câu hỏi ${data.questionIndex + 1}/${data.totalQuestions}`, 'info');
 
-        return () => {
-            if (timerRef.current) {
-                clearInterval(timerRef.current);
-            }
-            newSocket.disconnect();
-        };
-    }, [roomCode, user._id, onBackToLobby]);
+                // Start countdown timer
+                startQuestionTimer(data.timeLimit || 25);
+            });
+
+            // ✅ Match với backend event 'answer_submitted'
+            newSocket.on('answer_submitted', (data) => {
+                console.log('📝 Answer submitted:', data);
+                if (data.success) {
+                    addGameLog(' Đã gửi câu trả lời thành công', 'success');
+                }
+            });
+
+            // ✅ Match với backend event 'question_results'
+            newSocket.on('question_results', (data) => {
+                console.log('📊 Question results:', data);
+                setLeaderboard(data.leaderboard || []);
+
+                // Update player score
+                const playerResult = data.playerResults?.find((p) => p.userId === user._id);
+                if (playerResult) {
+                    setPlayerScore((prev) => prev + playerResult.points);
+                    addGameLog(`🎯 Điểm câu này: +${playerResult.points}`, 'success');
+                }
+
+                console.log('Correct Answer Index from server:', data.correctAnswer); // ADDED FOR DEBUGGING
+                setCorrectAnswerIndex(data.correctAnswer); // server cần trả về correctAnswerIndex
+                addGameLog('📊 Kết quả câu hỏi', 'info');
+
+                // Clear timer
+                if (timerRef.current) {
+                    clearInterval(timerRef.current);
+                }
+
+                // Add 4-second delay to show results before clearing for next question
+                setTimeout(() => {
+                    setCurrentQuestion(null); // Clear current question to prepare for next
+                    setCorrectAnswerIndex(null); // Hide correct answer highlight
+                    setSelectedAnswer(null); // Clear selected answer
+                }, 4000); // 4 giây delay để hiển thị đáp án
+            });
+
+            // ✅ Match với backend event 'game_finished'
+            newSocket.on('game_finished', (data) => {
+                console.log('🏁 Game finished:', data);
+                setGameState('finished');
+                setLeaderboard(data.leaderboard || []);
+                addGameLog(' Trò chơi kết thúc!', 'success');
+            });
+
+            // Error events
+            newSocket.on('error', (data) => {
+                console.error('❌ Socket error:', data);
+                addGameLog(`❌ Lỗi: ${data.message}`, 'error');
+            });
+
+            setSocket(newSocket);
+
+            // Timeout để tránh chờ vô hạn
+            const connectionTimeout = setTimeout(() => {
+                if (!connected) {
+                    console.error('❌ GameRoom: Connection timeout');
+                    setIsConnecting(false);
+                    addGameLog('❌ Kết nối timeout', 'error');
+                }
+            }, 10000); // 10 giây timeout
+
+            return () => {
+                clearTimeout(connectionTimeout);
+                newSocket.disconnect();
+            };
+        } else {
+            // ✅ Nếu không có isAuthenticated hoặc roomCode, set connecting = false
+            setIsConnecting(false);
+        }
+    }, [isAuthenticated, roomCode, playerName, quizId, user]); // ✅ Thêm user vào dependency
 
     // Hiệu ứng countdown, khi countdown > 0 thì giảm dần, khi countdown = 0 thì gửi start_game
     useEffect(() => {
@@ -362,8 +401,16 @@ const GameRoom = ({ roomCode, quizId, user, playerName, onBackToLobby }) => {
                         <button
                             className="start-game-btn"
                             onClick={handleStartGame}
-                            // ✅ Sửa: Bỏ disabled condition
-                            // disabled={players.length < 2}
+                            style={{ 
+                                fontSize: '1.2rem', 
+                                padding: '15px 30px',
+                                backgroundColor: '#4CAF50',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '8px',
+                                cursor: 'pointer',
+                                marginTop: '20px'
+                            }}
                         >
                             🎮 Bắt đầu trò chơi
                         </button>
@@ -514,24 +561,51 @@ const GameRoom = ({ roomCode, quizId, user, playerName, onBackToLobby }) => {
         </div>
     );
 
-    // Main render
-    if (!connected) {
+    // Main render - Sửa logic render
+    if (!isAuthenticated) {
         return (
-            <div className="game-room">
-                <div className="connection-status">
-                    <h2> Đang kết nối...</h2>
-                    <p>Vui lòng chờ kết nối với server</p>
+            <div className="game-room-container">
+                <div className="auth-required">
+                    <h2> Vui lòng đăng nhập</h2>
+                    <p>Bạn cần đăng nhập để tham gia phòng chơi.</p>
+                    <button onClick={onBackToLobby} className="back-btn">
+                        ← Quay lại Lobby
+                    </button>
                 </div>
             </div>
         );
     }
 
-    if (!authenticated) {
+    // ✅ Kiểm tra connecting state trước
+    if (isConnecting) {
         return (
             <div className="game-room">
-                <div className="auth-status">
-                    <h2> Đang xác thực...</h2>
-                    <p>Vui lòng chờ xác thực</p>
+                <div className="connection-status">
+                    <div className="loading-spinner">⏳</div>
+                    <h2> Đang kết nối...</h2>
+                    <p>Vui lòng chờ kết nối với server</p>
+                    <div className="connection-progress">
+                        <div className="progress-bar"></div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // ✅ Kiểm tra connected state
+    if (!connected) {
+        return (
+            <div className="game-room">
+                <div className="connection-status">
+                    <div className="error-icon">❌</div>
+                    <h2> Kết nối thất bại</h2>
+                    <p>Không thể kết nối với server. Vui lòng thử lại.</p>
+                    <button onClick={() => window.location.reload()} className="retry-btn">
+                        🔄 Thử lại
+                    </button>
+                    <button onClick={onBackToLobby} className="back-btn">
+                        ← Quay lại Lobby
+                    </button>
                 </div>
             </div>
         );

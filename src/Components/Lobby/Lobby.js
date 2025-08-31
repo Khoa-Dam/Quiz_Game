@@ -5,7 +5,8 @@ import './Lobby.css';
 const Lobby = ({ onStartQuiz, isAuthenticated, user, onEnterGameRoom, onEditQuiz }) => {
     const [socket, setSocket] = useState(null);
     const [connected, setConnected] = useState(false);
-    const [authenticated, setAuthenticated] = useState(false);
+    // ✅ BỎ HOÀN TOÀN authenticated state
+    // const [authenticated, setAuthenticated] = useState(false);
     const [selectedQuiz, setSelectedQuiz] = useState(null);
     const [availableQuizzes, setAvailableQuizzes] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -21,30 +22,33 @@ const Lobby = ({ onStartQuiz, isAuthenticated, user, onEnterGameRoom, onEditQuiz
     const roomActionsRef = useRef(null);
 
     // API Configuration
-    const API_BASE = 'http://localhost:3000/api/v1';
+    const API_BASE = 'http://localhost:4000/api/v1';
 
     // Initialize Socket.IO connection
     useEffect(() => {
         if (isAuthenticated) {
-            const newSocket = io('http://localhost:3000');
+            const newSocket = io('http://localhost:4000');
             socketRef.current = newSocket;
 
             // Connection events
             newSocket.on('connect', () => {
                 console.log('✅ Connected to Socket.IO server');
                 setConnected(true);
-
-                // Authenticate with JWT token
+                // ✅ BỎ setAuthenticated(true) - không cần nữa
+                
+                // Gửi authentication event
                 const token = localStorage.getItem('quiz_token');
                 if (token) {
                     newSocket.emit('authenticate', { token });
+                } else {
+                    newSocket.emit('authenticate', {});
                 }
             });
 
-            // Authentication events
+            // Authentication events (optional)
             newSocket.on('authenticated', (data) => {
                 console.log('✅ Authenticated successfully:', data);
-                setAuthenticated(true);
+                // ✅ BỎ setAuthenticated(true) - không cần nữa
             });
 
             // Room events
@@ -78,7 +82,7 @@ const Lobby = ({ onStartQuiz, isAuthenticated, user, onEnterGameRoom, onEditQuiz
                 newSocket.disconnect();
             };
         }
-    }, [isAuthenticated, selectedQuiz, onEnterGameRoom]);
+    }, [isAuthenticated]);
 
     // Animated grid background color following mouse position
     useEffect(() => {
@@ -101,14 +105,35 @@ const Lobby = ({ onStartQuiz, isAuthenticated, user, onEnterGameRoom, onEditQuiz
 
     // Load available quizzes from backend
     const loadAvailableQuizzes = async () => {
+        console.log('🔍 loadAvailableQuizzes called');
         try {
             setIsLoading(true);
-            const response = await fetch(`${API_BASE}/quiz/all`);
+            
+            // ✅ Xử lý cả 2 loại token
+            const token = localStorage.getItem('quiz_token');
+            const hasLocalToken = !!token;
+            
+            console.log('🔑 Token type for quiz request:', hasLocalToken ? 'localStorage' : 'cookie (Google OAuth)');
+            
+            const headers = {};
+            if (hasLocalToken) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            
+            console.log('🚀 Fetching from:', `${API_BASE}/quiz/all`);
+            
+            const response = await fetch(`${API_BASE}/quiz/all`, {
+                headers,
+                credentials: 'include' // Luôn gửi cookie
+            });
+            
+            console.log('📥 Response status:', response.status);
             const data = await response.json();
-
+            console.log('📥 Available quizzes:', data.data);
+            
             if (data.success) {
+                console.log('✅ Setting availableQuizzes:', data.data);
                 setAvailableQuizzes(data.data || []);
-                console.log('📥 Available quizzes:', data.data);
             } else {
                 console.log('❌ Failed to load quizzes:', data.message);
             }
@@ -121,10 +146,16 @@ const Lobby = ({ onStartQuiz, isAuthenticated, user, onEnterGameRoom, onEditQuiz
 
     // Load quizzes when authenticated
     useEffect(() => {
-        if (authenticated) {
+        console.log('🔍 useEffect triggered - isAuthenticated:', isAuthenticated);
+        
+        // ✅ Sử dụng trực tiếp isAuthenticated prop
+        if (isAuthenticated) {
+            console.log('🚀 Calling loadAvailableQuizzes...');
             loadAvailableQuizzes();
+        } else {
+            console.log('❌ Not authenticated, skipping loadAvailableQuizzes');
         }
-    }, [authenticated]);
+    }, [isAuthenticated]); // ✅ Chỉ dependency vào isAuthenticated
 
     // Scroll to room actions when a quiz is selected
     useEffect(() => {
@@ -150,11 +181,24 @@ const Lobby = ({ onStartQuiz, isAuthenticated, user, onEnterGameRoom, onEditQuiz
 
         try {
             setIsLoading(true);
+            
+            // ✅ Xử lý cả 2 loại token
             const token = localStorage.getItem('quiz_token');
-
+            const hasLocalToken = !!token;
+            
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            
+            if (hasLocalToken) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            
             const roomData = {
                 quizId: selectedQuiz._id,
-                playerName: playerName.trim(), // Pass player name
+                playerName: playerName.trim(),
+                // ✅ THÊM hostId để đảm bảo bạn trở thành Host
+                hostId: user?._id, // User ID của bạn
                 settings: {
                     maxPlayers: maxPlayers || 8,
                     autoStart: false,
@@ -166,10 +210,8 @@ const Lobby = ({ onStartQuiz, isAuthenticated, user, onEnterGameRoom, onEditQuiz
 
             const response = await fetch(`${API_BASE}/room/create`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
+                headers,
+                credentials: 'include',
                 body: JSON.stringify(roomData),
             });
 
@@ -182,11 +224,13 @@ const Lobby = ({ onStartQuiz, isAuthenticated, user, onEnterGameRoom, onEditQuiz
                 setRoomName('');
                 setMaxPlayers(4);
                 setSelectedQuiz(null);
-                setPlayerName(''); // Clear player name after successful creation
+                setPlayerName('');
 
-                // Navigate to game room
+                // ✅ Navigate to game room ngay lập tức
                 if (onEnterGameRoom) {
-                    onEnterGameRoom(data.data.roomCode, selectedQuiz._id, playerName);
+                    console.log(' Navigating to game room...');
+                    // ✅ Đảm bảo bạn là Host khi tạo phòng
+                    onEnterGameRoom(data.data.roomCode, selectedQuiz._id, playerName, true); // ✅ Thêm isHost = true
                 }
             } else {
                 alert(`❌ Lỗi tạo phòng: ${data.message}`);
@@ -212,21 +256,30 @@ const Lobby = ({ onStartQuiz, isAuthenticated, user, onEnterGameRoom, onEditQuiz
 
         try {
             setIsLoading(true);
+            
+            // ✅ Xử lý cả 2 loại token
             const token = localStorage.getItem('quiz_token');
-
+            const hasLocalToken = !!token;
+            
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            
+            if (hasLocalToken) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            
             const joinData = {
                 roomCode: roomCode.trim(),
-                playerName: playerName.trim(), // Pass player name
+                playerName: playerName.trim(),
             };
 
             console.log('🚀 Joining room:', joinData);
 
             const response = await fetch(`${API_BASE}/room/join`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
+                headers,
+                credentials: 'include', // Luôn gửi cookie
                 body: JSON.stringify(joinData),
             });
 
@@ -270,22 +323,41 @@ const Lobby = ({ onStartQuiz, isAuthenticated, user, onEnterGameRoom, onEditQuiz
         if (window.confirm('Bạn có chắc chắn muốn xóa quiz này không?')) {
             try {
                 setIsLoading(true);
+                
+                // ✅ Debug log
+                console.log('🗑️ Attempting to delete quiz:', quizId);
+                console.log('🔑 Current user:', user);
+                
+                // ✅ Xử lý cả 2 loại token
                 const token = localStorage.getItem('quiz_token');
+                const hasLocalToken = !!token;
+                
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+                
+                if (hasLocalToken) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
+                
+                console.log('🚀 Delete request headers:', headers);
+                
                 const response = await fetch(`${API_BASE}/quiz/${quizId}`, {
                     method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${token}`,
-                    },
+                    headers,
+                    credentials: 'include', // Luôn gửi cookie
                 });
 
+                console.log('📥 Delete response status:', response.status);
                 const data = await response.json();
+                console.log('📥 Delete response data:', data);
 
                 if (data.success) {
                     alert('✅ Xóa quiz thành công!');
                     loadAvailableQuizzes(); // Refresh the quiz list
                 } else {
                     alert(`❌ Lỗi xóa quiz: ${data.message}`);
+                    console.error('❌ Delete error details:', data);
                 }
             } catch (error) {
                 console.error('❌ Error deleting quiz:', error);

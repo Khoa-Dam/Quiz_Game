@@ -3,7 +3,7 @@ import './CreateQuiz.css';
 
 const CreateQuiz = ({ isAuthenticated, user, quizId, onFinishEditing }) => {
     // API Configuration
-    const API_BASE = 'http://localhost:3000/api/v1';
+    const API_BASE = 'http://localhost:4000/api/v1';
 
     const [quizData, setQuizData] = useState({
         title: '',
@@ -205,12 +205,21 @@ const CreateQuiz = ({ isAuthenticated, user, quizId, onFinishEditing }) => {
         setIsLoading(true);
 
         try {
+            // ✅ Xử lý cả 2 loại token
             const token = localStorage.getItem('quiz_token');
-            if (!token) {
-                alert('Vui lòng đăng nhập lại!');
-                return;
+            const hasLocalToken = !!token;
+            
+            console.log('🔑 Token type:', hasLocalToken ? 'localStorage' : 'cookie (Google OAuth)');
+            
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            
+            // Nếu có localStorage token, gửi Authorization header
+            if (hasLocalToken) {
+                headers['Authorization'] = `Bearer ${token}`;
             }
-
+            
             const quizPayload = {
                 title: quizData.title,
                 description: quizData.description,
@@ -234,10 +243,8 @@ const CreateQuiz = ({ isAuthenticated, user, quizId, onFinishEditing }) => {
 
             const response = await fetch(url, {
                 method: method,
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
+                headers,
+                credentials: 'include', // Luôn gửi cookie
                 body: JSON.stringify(quizPayload),
             });
 

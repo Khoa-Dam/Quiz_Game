@@ -79,30 +79,29 @@ function App() {
     useEffect(() => {
         setQuestions(mockQuestions);
 
-        // Check if user is already logged in (localStorage)
+        // ✅ Xử lý cả 2 loại đăng nhập
         const savedUser = localStorage.getItem('quizUser');
         const savedToken = localStorage.getItem('quiz_token');
-
+        
+        // Kiểm tra cả localStorage và cookie
         if (savedUser && savedToken) {
+            // Đăng nhập thường (Email/Password)
             const userData = JSON.parse(savedUser);
             setUser(userData);
             setToken(savedToken);
             setIsAuthenticated(true);
-            console.log('✅ User đã đăng nhập từ localStorage:', userData);
+            console.log('✅ User đã đăng nhập từ localStorage (Email/Password):', userData);
+        } else {
+            // Kiểm tra Google OAuth cookie
+            checkGoogleOAuthStatus();
         }
 
         // Handle Google OAuth success redirect
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('oauth_success') === 'true') {
             console.log('✅ App.js: Google OAuth success detected!');
-            
-            // Hiển thị thông báo thành công
             toast.success('Đăng nhập Google thành công!');
-            
-            // Gọi API trực tiếp để lấy user data
             fetchUserDataAfterOAuth();
-            
-            // Clean up URL
             window.history.replaceState({}, document.title, window.location.pathname);
         }
 
@@ -112,13 +111,44 @@ function App() {
         }
     }, []);
 
+    // ✅ Sửa function kiểm tra Google OAuth status
+    const checkGoogleOAuthStatus = async () => {
+        try {
+            console.log('🔍 App.js: Checking Google OAuth status...');
+            
+            // Sử dụng /user/data thay vì /auth/check-auth
+            const response = await fetch(`${API_BASE}/user/data`, {
+                credentials: 'include'
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success && data.userData) {
+                    const userData = {
+                        _id: data.userData._id || 'temp_id',
+                        name: data.userData.name,
+                        email: data.userData.email || 'user@example.com',
+                        avatar: data.userData.avatar || data.userData.profilePicture,
+                    };
+                    
+                    setUser(userData);
+                    setIsAuthenticated(true); // ✅ SET AUTHENTICATED = TRUE
+                    localStorage.setItem('quizUser', JSON.stringify(userData));
+                    console.log('✅ App.js: User authenticated from Google OAuth cookie:', userData);
+                }
+            }
+        } catch (error) {
+            console.log('ℹ️ App.js: No active Google OAuth session');
+        }
+    };
+
     const fetchUserDataAfterOAuth = async () => {
         try {
             console.log('🔍 App.js: Fetching user data after OAuth...');
             
             const response = await fetch(`${API_BASE}/user/data`, {
                 method: 'GET',
-                credentials: 'include', // Include cookies
+                credentials: 'include',
             });
             
             if (response.ok) {
@@ -134,10 +164,11 @@ function App() {
                     };
                     
                     setUser(userData);
-                    setIsAuthenticated(true);
+                    setIsAuthenticated(true); // ✅ SET AUTHENTICATED = TRUE
                     localStorage.setItem('quizUser', JSON.stringify(userData));
                     
                     console.log('✅ App.js: User data set after OAuth:', userData);
+                    console.log('✅ App.js: isAuthenticated set to:', true); // ✅ THÊM LOG NÀY
                 }
             }
         } catch (error) {
@@ -260,12 +291,14 @@ function App() {
     };
 
     // GameRoom handlers
-    const handleEnterGameRoom = (roomCode, quizId, playerName) => {
-        console.log(' Entering game room:', { roomCode, quizId, playerName });
+    const handleEnterGameRoom = (roomCode, quizId, playerName, isHost = false) => { // ✅ Thêm isHost parameter
+        console.log(' Entering game room:', { roomCode, quizId, playerName, isHost });
         setCurrentRoomCode(roomCode);
         setCurrentQuizId(quizId);
         setCurrentPlayerName(playerName || '');
         setShowGameRoom(true);
+        // ✅ Lưu isHost status
+        localStorage.setItem('currentRoom_isHost', isHost.toString());
     };
 
     const handleStartEditQuiz = (quizId) => {
@@ -361,6 +394,8 @@ function App() {
                     user={user}
                     playerName={currentPlayerName}
                     onBackToLobby={handleBackToLobby}
+                    isAuthenticated={isAuthenticated}
+                    isHost={localStorage.getItem('currentRoom_isHost') === 'true'} // ✅ Truyền isHost prop
                 />
             );
         }
