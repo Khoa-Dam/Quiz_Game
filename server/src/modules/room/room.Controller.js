@@ -2,8 +2,9 @@ import { roomService } from "./room.Service.js";
 
 export const createRoom = async (req, res) => {
   try {
-    const { quizId, settings } = req.body;
-    const hostId = req.body.userId; // From auth middleware
+    const { quizId, settings, hostId } = req.body; // ✅ Lấy hostId từ body
+    // ✅ Sử dụng hostId từ body hoặc fallback về userId từ auth
+    const finalHostId = hostId || req.body.userId;
 
     if (!quizId) {
       return res.json({
@@ -12,19 +13,30 @@ export const createRoom = async (req, res) => {
       });
     }
 
-    const result = await roomService.createRoom({ quizId, hostId, settings });
+    if (!finalHostId) {
+      return res.json({
+        success: false,
+        message: "Host ID is required"
+      });
+    }
+
+    console.log('🏠 Room Controller: Creating room with hostId:', finalHostId);
+
+    const result = await roomService.createRoom({ quizId, hostId: finalHostId, settings });
 
     return res.json({
       success: true,
       data: {
         roomId: result.room._id,
         roomCode: result.roomCode,
-        quizTitle: result.room.quiz?.title
+        quizTitle: result.room.quiz?.title,
+        hostId: finalHostId // ✅ Trả về hostId để frontend biết
       },
       message: result.message
     });
 
   } catch (error) {
+    console.error('❌ Room Controller Error:', error);
     return res.json({
       success: false,
       message: error.message
