@@ -375,3 +375,59 @@
     transition: transform 0.3s ease, opacity 0.3s ease;
   }
 }
+
+/* Google OAuth Section */
+.oauth-section {
+  margin-top: 20px;
+}
+
+.oauth-divider {
+  text-align: center;
+  margin: 20px 0;
+  position: relative;
+}
+
+.oauth-divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: var(--border-color);
+}
+
+.oauth-divider span {
+  background-color: var(--bg-primary);
+  padding: 0 16px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.google-oauth-btn {
+  width: 100%;
+  padding: 14px 24px;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  background-color: white;
+  color: #333;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.google-oauth-btn:hover {
+  border-color: #4285F4;
+  box-shadow: 0 4px 12px rgba(66, 133, 244, 0.2);
+  transform: translateY(-2px);
+}
+
+.google-icon {
+  width: 20px;
+  height: 20px;
+}

@@ -50,7 +50,7 @@ function App() {
     ];
 
     // API Configuration
-    const API_BASE = 'http://localhost:3000/api/v1';
+    const API_BASE = 'http://localhost:4000/api/v1';
 
     // Quiz state
     const [questions, setQuestions] = useState([]);
@@ -90,11 +90,60 @@ function App() {
             setIsAuthenticated(true);
             console.log('✅ User đã đăng nhập từ localStorage:', userData);
         }
+
+        // Handle Google OAuth success redirect
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('oauth_success') === 'true') {
+            console.log('✅ App.js: Google OAuth success detected!');
+            
+            // Hiển thị thông báo thành công
+            toast.success('Đăng nhập Google thành công!');
+            
+            // Gọi API trực tiếp để lấy user data
+            fetchUserDataAfterOAuth();
+            
+            // Clean up URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+
         const savedNightMode = localStorage.getItem('settings_nightMode');
         if (savedNightMode === 'true') {
             document.body.classList.add('dark-mode');
         }
     }, []);
+
+    const fetchUserDataAfterOAuth = async () => {
+        try {
+            console.log('🔍 App.js: Fetching user data after OAuth...');
+            
+            const response = await fetch(`${API_BASE}/user/data`, {
+                method: 'GET',
+                credentials: 'include', // Include cookies
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                console.log('📥 App.js: User data response:', data);
+                
+                if (data.success && data.userData) {
+                    const userData = {
+                        _id: data.userData._id || 'temp_id',
+                        name: data.userData.name,
+                        email: data.userData.email || 'user@example.com',
+                        avatar: data.userData.avatar || data.userData.profilePicture,
+                    };
+                    
+                    setUser(userData);
+                    setIsAuthenticated(true);
+                    localStorage.setItem('quizUser', JSON.stringify(userData));
+                    
+                    console.log('✅ App.js: User data set after OAuth:', userData);
+                }
+            }
+        } catch (error) {
+            console.error('❌ App.js: Error fetching user data after OAuth:', error);
+        }
+    };
 
     // API Authentication handlers
     const handleLogin = async (credentials) => {
