@@ -1,10 +1,7 @@
 // src/modules/auth/google/googleController.js
 import { createGoogleOAuthClient, googleAuthUrl } from "../../../config/googleOAuth.js";
 import { authService } from "../auth.Service.js";
-// Nếu tokenService ở src/services/tokenService.js:
 import { tokenService } from "../token.Service.js";
-// Nếu bạn để ở src/modules/auth/tokenService.js thì dùng:
-// import { tokenService } from "../tokenService.js";
 
 const { FRONTEND_URL } = process.env;
 
@@ -30,15 +27,15 @@ export async function googleStart(req, res) {
 export async function googleCallback(req, res) {
     try {
         const code = req.query.code;
-        const state = req.query.state ? decodeURIComponent(req.query.state) : CLIENT_URL;
+        const state = req.query.state ? decodeURIComponent(req.query.state) : FRONTEND_URL;
 
         if (!code) {
             return res.status(400).json({ success: false, message: "Missing code" });
         }
 
         const client = createGoogleOAuthClient();
-        const { tokens } = await client.getToken(code);           // exchange code -> tokens
-        const ticket = await client.verifyIdToken({                // verify id_token
+        const { tokens } = await client.getToken(code);
+        const ticket = await client.verifyIdToken({
             idToken: tokens.id_token,
             audience: process.env.GOOGLE_CLIENT_ID,
         });
@@ -53,12 +50,15 @@ export async function googleCallback(req, res) {
             emailVerified: !!payload.email_verified,
         });
 
-        // ====== PHẦN QUAN TRỌNG: dùng single token theo services/tokenService.js ======
+        // Tạo token và set cookie
         const token = tokenService.createToken(user._id.toString());
-        tokenService.setCookie(res, token); // sẽ set cookie "token" httpOnly
+        tokenService.setCookie(res, token);
 
-        // Redirect về FE
-        return res.redirect(state || CLIENT_URL);
+        // Redirect về Frontend
+        const redirectUrl = new URL(state || FRONTEND_URL);
+        redirectUrl.searchParams.set('oauth_success', 'true');
+        return res.redirect(redirectUrl.toString());
+        
     } catch (e) {
         console.error("[googleCallback] error:", e);
         return res.status(500).json({ success: false, message: e.message });

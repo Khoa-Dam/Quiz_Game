@@ -30,6 +30,8 @@ const getUserData = async (req, res) => {
       success: true,
       userData: {
         name: user.name,
+        email: user.email,                // ✅ Thêm email
+        avatar: user.avatar || user.profilePicture, // ✅ Thêm avatar
         isAccountVerified: user.isAccountVerified,
         profilePicture: user.profilePicture,
       },

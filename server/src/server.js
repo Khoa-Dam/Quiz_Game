@@ -21,7 +21,10 @@ const io = new Server(server, {
 const port = process.env.PORT || 3000;
 connectDB();
 
-app.use(cors({ credentials: true }));
+app.use(cors({ 
+    origin: "http://localhost:3000", // Cho phép cụ thể frontend
+    credentials: true 
+}));
 app.use(cookieParser());
 app.use(express.json({ limit: "10mb" }));
 
