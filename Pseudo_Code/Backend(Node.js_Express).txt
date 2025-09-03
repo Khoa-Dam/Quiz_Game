@@ -1,0 +1,143 @@
+BEGIN Backend
+
+1. INIT
+   START Express server
+   ENABLE middleware (JSON parser, CORS, auth middleware)
+   CONNECT Database
+
+2. AUTH MODULE
+   ROUTE POST "/register"
+       RECEIVE username, password
+       IF username exists THEN RETURN 409 error
+       HASH password
+       CREATE user { username, password_hash, avatar_url = null, role = "user" }
+       RETURN 201 success
+
+   ROUTE POST "/login"
+       RECEIVE username, password
+       FIND user by username
+       IF user not found OR password invalid THEN RETURN 401
+       GENERATE JWT { user_id, role }
+       RETURN { token }
+
+   MIDDLEWARE "authRequired"
+       READ Authorization header → verify JWT
+       IF invalid THEN RETURN 401
+       SET req.user = { id, role } → NEXT
+
+   MIDDLEWARE "isAdmin"
+       IF req.user.role != "admin" THEN RETURN 403
+       NEXT
+
+3. PROFILE MODULE
+   ROUTE GET "/api/user/profile" (authRequired)
+       FIND user by req.user.id
+       RETURN { id, username, avatar_url, role }
+
+   ROUTE PUT "/api/user/update" (authRequired)
+       RECEIVE new_username (optional), avatar_url (optional)
+       IF new_username provided THEN CHECK duplicate
+       UPDATE user document
+       RETURN success
+
+4. QUESTION MODULE
+   ROUTE GET "/api/questions" (authRequired)
+       READ optional filters/paging
+       FETCH questions
+       RETURN array
+
+   ROUTE POST "/api/questions" (authRequired, isAdmin)
+       RECEIVE question_text, options[], correct_answer
+       VALIDATE required fields
+       SAVE question { question_text, options, correct_answer, created_by = req.user.id }
+       RETURN 201 success
+
+   ROUTE PUT "/api/questions/:id" (authRequired, isAdmin)
+       RECEIVE fields to update
+       VALIDATE if provided
+       UPDATE question by id
+       RETURN success
+
+5. QUIZ (Single Player)
+   ROUTE POST "/api/submit" (authRequired)
+       RECEIVE score
+       SAVE result { user_id = req.user.id, score, timestamp = now }
+       RETURN success
+
+6. ROOM MODULE
+   -- Data model: rooms, room_participants, room state machine
+   -- status: "waiting" | "live" | "ended"
+   -- Each room stores question_ids array and current_index
+
+   ROUTE POST "/api/rooms/create" (authRequired)
+       RECEIVE params: question_set_id OR number_of_questions, time_per_question
+       SELECT question_ids accordingly
+       GENERATE room_code (unique)
+       CREATE room { host_id = req.user.id, code = room_code, status = "waiting",
+                     question_ids, current_index = -1, time_per_question }
+       ADD host to participants with score = 0
+       RETURN { room_id, room_code }
+
+   ROUTE POST "/api/rooms/join" (authRequired)
+       RECEIVE room_code
+       FIND room by code
+       IF not found OR status != "waiting" THEN RETURN 400
+       IF user already in participants THEN RETURN 200 (idempotent)
+       ADD participant { room_id, user_id = req.user.id, score = 0, joined_at = now }
+       RETURN { room_id }
+
+   ROUTE GET "/api/rooms/:id/state" (authRequired)
+       VERIFY user is participant
+       RETURN { status, participants (masked), current_index }
+
+   ROUTE POST "/api/rooms/:id/start" (authRequired)
+       VERIFY req.user.id == room.host_id
+       IF room.status != "waiting" THEN RETURN 400
+       SET room.status = "live"
+       SET room.current_index = 0
+       NOTIFY participants "ROOM_STARTED"
+       RETURN success
+
+   ROUTE GET "/api/rooms/:id/question" (authRequired)
+       VERIFY user is participant
+       IF room.status != "live" THEN RETURN 400
+       LET qid = room.question_ids[room.current_index]
+       FETCH question (without correct_answer if you want anti-cheat)
+       RETURN { question_id, question_text, options }
+
+   ROUTE POST "/api/rooms/:id/answer" (authRequired)
+       VERIFY participant
+       RECEIVE { question_id, selected_option, time_taken_ms }
+       IF already answered this question by this user THEN RETURN 200 (idempotent)
+       COMPUTE is_correct by comparing with correct_answer
+       UPDATE participant score:
+           IF is_correct THEN score += 1 (or add based on time if needed)
+       SAVE room_answer { room_id, user_id, question_id, selected_option, is_correct, time_taken_ms }
+       RETURN { is_correct, current_score }
+
+   ROUTE POST "/api/rooms/:id/next" (authRequired)
+       -- Typically host or server timer calls this
+       VERIFY req.user.id == room.host_id
+       IF room.current_index < room.question_ids.length - 1 THEN
+           INCREMENT room.current_index
+           NOTIFY participants "NEXT_QUESTION"
+           RETURN { current_index }
+       ELSE
+           SET room.status = "ended"
+           COMPUTE leaderboard from participants scores
+           RETURN { status: "ended" }
+       ENDIF
+
+   ROUTE GET "/api/rooms/:id/leaderboard" (authRequired)
+       IF room.status != "ended" THEN RETURN 400
+       RETURN sorted participants by score desc (and tie-breakers)
+
+7. (OPTIONAL) SOCKET EVENTS (if using WebSocket)
+   ON "JOIN_ROOM" → validate token, join room channel
+   EMIT "ROOM_STATE" on join/leave
+   EMIT "QUESTION" when index changes
+   ON "ANSWER" → same logic as POST /answer
+   EMIT "SCORES" periodically or per-answer
+   EMIT "END" with leaderboard
+
+END Backend

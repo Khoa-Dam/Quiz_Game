@@ -1,0 +1,97 @@
+BEGIN Frontend
+
+1. INITIALIZE Application
+   - Setup routing: Login, Register, Quiz, Result, Profile, AdminQuestions, RoomLobby, RoomPlay
+   - IF token exists THEN validate token → set auth state
+
+2. AUTHENTICATION
+   IF user chooses "Register" THEN
+       INPUT username, password
+       CALL POST /register
+       IF success THEN SHOW "Registered" → REDIRECT Login
+       ELSE SHOW error
+   ENDIF
+
+   IF user chooses "Login" THEN
+       INPUT username, password
+       CALL POST /login
+       IF success THEN SAVE token → REDIRECT Quiz (or Dashboard)
+       ELSE SHOW error
+   ENDIF
+
+3. PROFILE
+   ON Profile page:
+       CALL GET /api/user/profile (with token)
+       DISPLAY username, avatar
+       IF user edits profile THEN
+           INPUT new_username (optional), avatar_file (optional)
+           IF avatar_file provided THEN UPLOAD to storage → RECEIVE avatar_url
+           CALL PUT /api/user/update { new_username, avatar_url }
+           IF success THEN SHOW "Profile updated"
+           ELSE SHOW error
+       ENDIF
+
+4. QUIZ (Single Player)
+   CALL GET /api/questions (with token)
+   SET score = 0, index = 0
+   WHILE index < total_questions DO
+       DISPLAY question[index] and options
+       WAIT user selects answer
+       IF user_answer == correct_answer THEN score = score + number score for each question + bonus Time
+       index = index + 1
+   ENDWHILE
+   DISPLAY final score
+   CALL POST /api/submit { score } (with token)
+
+5. ADMIN – QUESTION MANAGEMENT (Create/Edit)
+   REQUIRE user.isAdmin == true
+   ON AdminQuestions page:
+       CALL GET /api/questions?paging/filter (optional)
+       DISPLAY list of questions
+
+       IF user clicks "Create" THEN
+           INPUT question_text, options[], correct_answer
+           VALIDATE options length >= 2 AND correct_answer in options
+           CALL POST /api/questions { question_text, options, correct_answer }
+           IF success THEN REFRESH list ELSE SHOW error
+       ENDIF
+
+       IF user clicks "Edit" on a question THEN
+           LOAD current values
+           INPUT new_question_text/options/correct_answer
+           VALIDATE as above
+           CALL PUT /api/questions/:id { updated fields }
+           IF success THEN REFRESH list ELSE SHOW error
+       ENDIF
+
+6. ROOMS – MULTIPLAYER
+   6.1 CREATE ROOM (Host)
+       CLICK "Create Room"
+       SELECT question_set or params (e.g., number_of_questions, time_per_question)
+       CALL POST /api/rooms/create
+       RECEIVE { room_id, room_code }
+       NAVIGATE to RoomLobby(room_id)
+       DISPLAY room_code for others to join
+       LOOP UNTIL host clicks "Start" OR room closed
+           SHOW current participants via GET /api/rooms/:id or socket "ROOM_STATE"
+       ENDLOOP
+       IF host clicks "Start" THEN CALL POST /api/rooms/:id/start
+
+   6.2 JOIN ROOM (Player)
+       INPUT room_code
+       CALL POST /api/rooms/join { room_code }
+       IF success THEN NAVIGATE RoomLobby(room_id)
+       ELSE SHOW error (invalid/locked)
+
+   6.3 PLAY ROOM
+       FOR each question (served by server step-by-step)
+           RECEIVE question payload (via socket "QUESTION" OR GET /api/rooms/:id/next)
+           DISPLAY question and countdown timer
+           WAIT user selects answer OR timer ends
+           SEND answer via socket "ANSWER" OR POST /api/rooms/:id/answer
+           WAIT server feedback (correct? current scores optional)
+       ENDFOR
+       RECEIVE final leaderboard
+       DISPLAY leaderboard and option to leave room
+
+END Frontend

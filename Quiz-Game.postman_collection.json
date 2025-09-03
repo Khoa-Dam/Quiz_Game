@@ -1,0 +1,468 @@
+{
+	"info": {
+		"_postman_id": "84a216a9-2824-4791-a0a3-1b4b137a8a2a",
+		"name": "Quiz-Game",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "37311745",
+		"_collection_link": "https://vn2222.postman.co/workspace/NguoiVN~2453d60f-2d3d-4ee7-b52f-a3397191d05f/collection/37311745-84a216a9-2824-4791-a0a3-1b4b137a8a2a?action=share&source=collection_link&creator=37311745"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Hoa\",\r\n    \"email\": \"test1234567@gmail.com\",\r\n    \"password\": \"A123456789a@\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{$url}}/auth/register",
+							"host": [
+								"{{$url}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"test123@gmail.com\",\r\n    \"password\": \"A123456789a@\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{$url}}/auth/login",
+							"host": [
+								"{{$url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{$url}}/auth/logout",
+							"host": [
+								"{{$url}}"
+							],
+							"path": [
+								"auth",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Send verify otp",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{$url}}/auth/send-verify-otp",
+							"host": [
+								"{{$url}}"
+							],
+							"path": [
+								"auth",
+								"send-verify-otp"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verify Account",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"otp\":\"831381\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{$url}}/auth/verify-account",
+							"host": [
+								"{{$url}}"
+							],
+							"path": [
+								"auth",
+								"verify-account"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Authenticated",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{$url}}/auth/is-auth",
+							"host": [
+								"{{$url}}"
+							],
+							"path": [
+								"auth",
+								"is-auth"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Send Reset Otp",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"damngockhoa2005@gmail.com\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{$url}}/auth/send-reset-otp",
+							"host": [
+								"{{$url}}"
+							],
+							"path": [
+								"auth",
+								"send-reset-otp"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reset Password",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \r\n    \"email\": \"damngockhoa2005@gmail.com\",\r\n    \"otp\":\"128974\",\r\n    \"newPassword\": \"A123456789a@\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{$url}}/auth/reset-password",
+							"host": [
+								"{{$url}}"
+							],
+							"path": [
+								"auth",
+								"reset-password"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Quiz",
+			"item": [
+				{
+					"name": "GET Quiz (all)",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{$url}}/quiz/all",
+							"host": [
+								"{{$url}}"
+							],
+							"path": [
+								"quiz",
+								"all"
+							],
+							"query": [
+								{
+									"key": "",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET Quiz by id (all)",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{$url}}/quiz/688e2e4e9b4ff1cbd73ac4d4/game",
+							"host": [
+								"{{$url}}"
+							],
+							"path": [
+								"quiz",
+								"688e2e4e9b4ff1cbd73ac4d4",
+								"game"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST Quiz check answers",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"questionIndex\": 0,\r\n  \"selectedAnswer\": 0,\r\n  \"responseTime\": 5000\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{$url}}/quiz/688e2e4e9b4ff1cbd73ac4d4/check-answer",
+							"host": [
+								"{{$url}}"
+							],
+							"path": [
+								"quiz",
+								"688e2e4e9b4ff1cbd73ac4d4",
+								"check-answer"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT Quiz Update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "id",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "update des",
+									"type": "text"
+								},
+								{
+									"key": "name",
+									"value": "update name",
+									"type": "text"
+								},
+								{
+									"key": "difficulty",
+									"value": "EASY",
+									"type": "text"
+								},
+								{
+									"key": "quizImage",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{$url}}/quiz/_id",
+							"host": [
+								"{{$url}}"
+							],
+							"path": [
+								"quiz",
+								"_id"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE Quiz",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{$url}}/quiz/1",
+							"host": [
+								"{{$url}}"
+							],
+							"path": [
+								"quiz",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create quizz",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InVzZXJAZ21haWwuY29tIiwicm9sZSI6IlVTRVIiLCJpZCI6MiwiaWF0IjoxNjU5ODg1NjIxLCJleHAiOjE2NTk5NzIwMjF9.L-uB-NcGMI7ihCRpZKem-92dbTP4CpMjqQxYc98fQzg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"title\": \"Quiz Kiến Thức Cơ Bản\",\r\n  \"description\": \"Bộ câu hỏi kiểm tra kiến thức tổng hợp\",\r\n  \"questions\": [\r\n    {\r\n      \"text\": \"Thủ đô của Việt Nam là gì?\",\r\n      \"options\": [\"Hà Nội\", \"Hồ Chí Minh\", \"Đà Nẵng\", \"Huế\"],\r\n      \"correctAnswer\": 0\r\n    },\r\n    {\r\n      \"text\": \"1 + 1 = ?\",\r\n      \"options\": [\"1\", \"2\", \"3\", \"4\"],\r\n      \"correctAnswer\": 1\r\n    },\r\n    {\r\n      \"text\": \"Ai là người sáng lập Microsoft?\",\r\n      \"options\": [\"Bill Gates\", \"Steve Jobs\", \"Mark Zuckerberg\", \"Elon Musk\"],\r\n      \"correctAnswer\": 0\r\n    },\r\n    {\r\n      \"text\": \"Năm 2024 có bao nhiêu ngày?\",\r\n      \"options\": [\"365\", \"366\", \"364\", \"367\"],\r\n      \"correctAnswer\": 1\r\n    },\r\n    {\r\n      \"text\": \"Thành phố nào lớn nhất Việt Nam?\",\r\n      \"options\": [\"Hà Nội\", \"Hồ Chí Minh\", \"Đà Nẵng\", \"Cần Thơ\"],\r\n      \"correctAnswer\": 1\r\n    }\r\n  ],\r\n  \"timePerQuestion\": 30,\r\n  \"scoring\": {\r\n    \"basePoints\": 100,\r\n    \"timeBonus\": true,\r\n    \"maxTimeBonus\": 50,\r\n    \"penaltyForWrong\": false,\r\n    \"wrongAnswerPenalty\": 0\r\n  }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{$url}}/quiz/create",
+							"host": [
+								"{{$url}}"
+							],
+							"path": [
+								"quiz",
+								"create"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Room",
+			"item": [
+				{
+					"name": "Create Room",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"quizId\": \"688e2e4e9b4ff1cbd73ac4d4\",\r\n  \"settings\": {\r\n    \"maxPlayers\": 10,\r\n    \"timePerQuestion\": 30,\r\n    \"showLeaderboard\": true,\r\n    \"allowLateJoin\": false\r\n  }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{$url}}/room/create",
+							"host": [
+								"{{$url}}"
+							],
+							"path": [
+								"room",
+								"create"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

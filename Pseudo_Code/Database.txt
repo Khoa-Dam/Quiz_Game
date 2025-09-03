@@ -1,0 +1,54 @@
+BEGIN Database
+
+TABLE users
+   - id (PK)
+   - username (unique)
+   - password_hash
+   - avatar_url (nullable)
+   - role ("user" | "admin")
+   - created_at, updated_at
+
+TABLE questions
+   - id (PK)
+   - question_text
+   - options[]           -- array of strings
+   - correct_answer      -- value present in options
+   - created_by (FK users.id)
+   - created_at, updated_at
+
+TABLE results               -- single-player submissions
+   - id (PK)
+   - user_id (FK users.id)
+   - score (int)
+   - timestamp (datetime)
+
+TABLE rooms
+   - id (PK)
+   - code (unique, short string)
+   - host_id (FK users.id)
+   - status ("waiting" | "live" | "ended")
+   - question_ids[]       -- ordered list for the session
+   - current_index (int, -1 when not started)
+   - time_per_question (int seconds)
+   - created_at, updated_at
+
+TABLE room_participants
+   - id (PK)
+   - room_id (FK rooms.id)
+   - user_id (FK users.id)
+   - score (int default 0)
+   - joined_at (datetime)
+   - UNIQUE (room_id, user_id)
+
+TABLE room_answers
+   - id (PK)
+   - room_id (FK rooms.id)
+   - user_id (FK users.id)
+   - question_id (FK questions.id)
+   - selected_option (string)
+   - is_correct (bool)
+   - time_taken_ms (int)
+   - answered_at (datetime)
+   - UNIQUE (room_id, user_id, question_id)
+
+END Database
