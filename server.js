@@ -9,6 +9,8 @@ import v1Routes from "./routes/v1/index.js";
 import { GameSocketService } from "./services/socket/index.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { specs, swaggerUi } from "./config/swagger.js";
+import path from "path";
+import { fileURLToPath } from "url";
 const app = express();
 const server = createServer(app);
 const io = new Server(server, {
@@ -24,6 +26,11 @@ connectDB();
 app.use(cors({credentials: true}));
 app.use(cookieParser());
 app.use(express.json());
+
+// Static serving for uploads
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 // Routes
 app.get("/", (req, res) => {
